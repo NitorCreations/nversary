@@ -28,8 +28,7 @@ class SlackService {
                   type: "section",
                   text: {
                     type: "mrkdwn",
-                    text: message,
-                    emoji: true
+                    text: message
                   }
                 },
                 {
