@@ -25,10 +25,12 @@ class CongratulationService {
 
     const tag = await this.getTag(congratulationDay.employeeToCongratulate.email);
     const yearsAtCompany: number = this.yearsPresent(congratulationDay.employeeToCongratulate, date);
+    const startDate = congratulationDay.employeeToCongratulate.presence[0].start;
+    const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
     const message: string = `Congratulations *${congratulationDay.employeeToCongratulate.fullName}* ${tag ? tag + " " : ""}` +
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
-    
-    await this.slackService.sendMessage(message);
+    const contextMessage = `${congratulationDay.employeeToCongratulate.fullName} started at Nitor on ${startDateStr}`;
+    await this.slackService.sendMessage(message, contextMessage);
     return Promise.resolve();
   }
 

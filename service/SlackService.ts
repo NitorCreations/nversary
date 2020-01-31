@@ -11,9 +11,9 @@ class SlackService {
     this.slackConfiguration = slackConfiguration;
   }
 
-  public sendMessage(message: string) {
+  public sendMessage(message: string, contextMessage: string) {
     const url = this.slackConfiguration.webhookUrl;
-    console.log("Send to slack " + message + ", url " + url);
+    console.log("Send to slack " + message + ", url context message " + contextMessage + ", url " + url);
 
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
@@ -23,6 +23,24 @@ class SlackService {
           {
             json: {
               text: message,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: message
+                  }
+                },
+                {
+                  type: "context",
+                  elements: [
+                    {
+                      type: "mrkdwn",
+                      text: contextMessage
+                    }
+                  ]
+                }
+              ]
             },
           },
       );

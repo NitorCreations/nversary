@@ -24,7 +24,8 @@ it("Sends message without tag", async () => {
   anniversaryService.getEmployeeToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now);
-  expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* 2 years at Nitor! :tada:");
+  expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* 2 years at Nitor! :tada:",
+    "Employee 1 started at Nitor on 6.2.2018");
 });
 
 it("Sends message with tag", async () => {
@@ -38,5 +39,6 @@ it("Sends message with tag", async () => {
   anniversaryService.getEmployeeToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now);
-  expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* <@id> 2 years at Nitor! :tada:");
+  expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* <@id> 2 years at Nitor! :tada:",
+    "Employee 1 started at Nitor on 6.2.2018");
 });
