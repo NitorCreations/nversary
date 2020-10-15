@@ -16,20 +16,20 @@ class CongratulationService {
   public async congratulate(date: Date): Promise<void> {
     console.log("Congratulate on " + date);
 
-    const congratulationDay: CongratulationDay = this.anniversaryService.getEmployeeToCongratulateToday(date);
+    const congratulationDay: CongratulationDay = this.anniversaryService.getEmployeesToCongratulateToday(date);
 
-    if(!congratulationDay || !congratulationDay.employeeToCongratulate){
+    if(!congratulationDay || !congratulationDay.employeeToCongratulate1){
       console.log("No employees to congratulate today");
       return;
     }
 
-    const tag = await this.getTag(congratulationDay.employeeToCongratulate.email);
-    const yearsAtCompany: number = this.yearsPresent(congratulationDay.employeeToCongratulate, date);
-    const startDate = congratulationDay.employeeToCongratulate.presence[0].start;
+    const tag = await this.getTag(congratulationDay.employeeToCongratulate1.email);
+    const yearsAtCompany: number = this.yearsPresent(congratulationDay.employeeToCongratulate1, date);
+    const startDate = congratulationDay.employeeToCongratulate1.presence[0].start;
     const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
-    const message: string = `Congratulations *${congratulationDay.employeeToCongratulate.fullName}* ${tag ? tag + " " : ""}` +
+    const message: string = `Congratulations *${congratulationDay.employeeToCongratulate1.fullName}* ${tag ? tag + " " : ""}` +
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
-    const contextMessage = `${congratulationDay.employeeToCongratulate.fullName} started at Nitor on ${startDateStr}`;
+    const contextMessage = `${congratulationDay.employeeToCongratulate1.fullName} started at Nitor on ${startDateStr}`;
     await this.slackService.sendMessage(message, contextMessage);
     return Promise.resolve();
   }

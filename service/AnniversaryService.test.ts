@@ -14,10 +14,10 @@ import {SlackService} from "./SlackService";
  * 
  * 02-01: -
  * 02-02: -
- * 02-03: Employee 1
- * 02-04: Employee 2
- * 02-05: Employee 4
- * 02:06: Employee 3
+ * 02-03: Employee 1, Employee 2
+ * 02-04: Employee 4, Employee 3
+ * 02-05: 
+ * 02:06: 
  * 
  */
 const data = {
@@ -49,31 +49,31 @@ const service = new AnniversaryService(
   new EmployeeRepositoryLocalImpl((data as any)));
 
 it("It should not congratulate anyone on 2020-02-01 because it is Saturday", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-01T03:24:00"));
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-01T03:24:00"));
   expect(congratulationDay).toBeUndefined();
 });
 
 it("It should not congratulate anyone on 2020-02-01 because it is Sunday", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-02T03:24:00"));
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-02T03:24:00"));
   expect(congratulationDay).toBeUndefined();
 });
 
-it("It should congratulate Employee 1 on 2020-02-03 because it's closest to her starting date", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-03T03:24:00"));
-  expect(congratulationDay.employeeToCongratulate.fullName).toBe("Employee 1");
+it("It should congratulate Employee 1 on 2020-02-03 (slot 1), because it's closest to her starting date", async () => {
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-03T03:24:00"));
+  expect(congratulationDay.employeeToCongratulate1.fullName).toBe("Employee 1");
 });
 
-it("It should congratulate Employee 2 on 2020-02-04 because 02-03 was taken by E. 1.", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-04T03:24:00"));
-  expect(congratulationDay.employeeToCongratulate.fullName).toBe("Employee 2");
+it("It should congratulate Employee 2 on 2020-02-03 (slot 2) because slot 1 was taken by E. 1.", async () => {
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-03T03:24:00"));
+  expect(congratulationDay.employeeToCongratulate2.fullName).toBe("Employee 2");
 });
 
-it("It should congratulate Employee 4 on 2020-02-05 he has worked longer than E. 3", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-05T03:24:00"));
-  expect(congratulationDay.employeeToCongratulate.fullName).toBe("Employee 4");
+it("It should congratulate Employee 4 on 2020-02-04 (slot 1) he has worked longer than E. 3", async () => {
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-04T03:24:00"));
+  expect(congratulationDay.employeeToCongratulate1.fullName).toBe("Employee 4");
 });
 
-it("It should congratulate Employee 3 on 2020-02-06", async () => {
-  const congratulationDay = service.getEmployeeToCongratulateToday(new Date("2020-02-06T03:24:00"));
-  expect(congratulationDay.employeeToCongratulate.fullName).toBe("Employee 3");
+it("It should congratulate Employee 3 on 2020-02-04 (slot 2)", async () => {
+  const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-04T03:24:00"));
+  expect(congratulationDay.employeeToCongratulate2.fullName).toBe("Employee 3");
 });

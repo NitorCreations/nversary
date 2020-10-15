@@ -19,9 +19,9 @@ it("Sends message without tag", async () => {
   slackService.sendMessage = jest.fn((message) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate = new Employee("Employee 1", "asd@asd.com",
+  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd@asd.com",
     [new Presence(new Date("2018-02-06"))]);
-  anniversaryService.getEmployeeToCongratulateToday = jest.fn((date: Date) => congratulationDay);
+  anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now);
   expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* 2 years at Nitor! :tada:",
@@ -34,9 +34,9 @@ it("Sends message with tag", async () => {
   slackService.sendMessage = jest.fn((message) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate = new Employee("Employee 1", "asd@asd.com",
+  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd@asd.com",
     [new Presence(new Date("2018-02-06"))]);
-  anniversaryService.getEmployeeToCongratulateToday = jest.fn((date: Date) => congratulationDay);
+  anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now);
   expect(slackService.sendMessage).toBeCalledWith("Congratulations *Employee 1* <@id> 2 years at Nitor! :tada:",
