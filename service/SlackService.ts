@@ -1,4 +1,3 @@
-import * as http from "http";
 import * as request from "request-promise";
 
 import {SlackConfiguration} from "../domain/SlackConfiguration";
@@ -9,6 +8,47 @@ class SlackService {
 
   constructor(slackConfiguration: SlackConfiguration) {
     this.slackConfiguration = slackConfiguration;
+  }
+
+  public scheduleMessage(message: string, contextMessage: string, date: Date) {
+    const url = "https://slack.com/api/chat.scheduleMessage";
+    
+    if (this.slackConfiguration.dryRun) {
+      return Promise.resolve(message);
+    } else {
+      return request.post(
+          url,
+          {
+            json: {
+              channel: this.slackConfiguration.channelId,
+              // unix timestamp
+              post_at: date.getTime() / 1000,
+              text: message,
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: message
+                  }
+                },
+                {
+                  type: "context",
+                  elements: [
+                    {
+                      type: "mrkdwn",
+                      text: contextMessage
+                    }
+                  ]
+                }
+              ]
+            },
+            auth: {
+              bearer: this.slackConfiguration.appToken
+            },
+          },
+      );
+    }
   }
 
   public sendMessage(message: string, contextMessage: string) {

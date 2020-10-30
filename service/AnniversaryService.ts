@@ -1,7 +1,5 @@
 import {CongratulationDay} from "../domain/CongratulationDay";
-import {SlackUser} from "../domain/SlackUser";
 import {IEmployeeRepository} from "../repository/EmployeeRepository";
-import {SlackService} from "./SlackService";
 
 class AnniversaryService {
   private employeeRepository: IEmployeeRepository;

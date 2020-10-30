@@ -23,15 +23,31 @@ class CongratulationService {
       return;
     }
 
-    const tag = await this.getTag(congratulationDay.employeeToCongratulate1.email);
-    const yearsAtCompany: number = this.yearsPresent(congratulationDay.employeeToCongratulate1, date);
-    const startDate = congratulationDay.employeeToCongratulate1.presence[0].start;
-    const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
-    const message: string = `Congratulations *${congratulationDay.employeeToCongratulate1.fullName}* ${tag ? tag + " " : ""}` +
-      `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
-    const contextMessage = `${congratulationDay.employeeToCongratulate1.fullName} started at Nitor on ${startDateStr}`;
-    await this.slackService.sendMessage(message, contextMessage);
+    if(congratulationDay.employeeToCongratulate1){
+      // send the first message at 11:50 UTC
+      date.setHours(11);
+      date.setMinutes(50);
+      await this.congratulateEmployee(congratulationDay.employeeToCongratulate1, date);
+    }
+    if(congratulationDay.employeeToCongratulate2){
+      // send the second message at 7:50 UTC
+      date.setHours(11);
+      date.setMinutes(50);
+      await this.congratulateEmployee(congratulationDay.employeeToCongratulate2, date);
+    }
+
     return Promise.resolve();
+  }
+
+  private async congratulateEmployee(employee : Employee, messageTime : Date){
+    const tag = await this.getTag(employee.email);
+    const yearsAtCompany: number = this.yearsPresent(employee, messageTime);
+    const startDate = employee.presence[0].start;
+    const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
+    const message: string = `Congratulations *${employee.fullName}* ${tag ? tag + " " : ""}` +
+      `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
+    const contextMessage = `${employee.fullName} started at Nitor on ${startDateStr}`;
+    await this.slackService.scheduleMessage(message, contextMessage, messageTime);
   }
 
   public yearsPresent(employee: Employee, now: Date): number {
@@ -42,7 +58,6 @@ class CongratulationService {
     const user: SlackUser = (await this.slackService.getChannelUsers()).filter((u) => u.email === email).pop();
     return Promise.resolve(user ? "<@" + user.id  + ">": null);
   }
-
 }
 
 export { CongratulationService };
