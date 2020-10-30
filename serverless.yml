@@ -14,4 +14,4 @@ functions:
   nversaryGreeter:
     handler: handler.greeter
     events:
-    - schedule: cron(50 11 * * ? *)
+    - schedule: cron(50 3 * * ? *)
