@@ -31,7 +31,7 @@ class CongratulationService {
     }
     if(congratulationDay.employeeToCongratulate2){
       // send the second message at 7:50 UTC
-      date.setHours(11);
+      date.setHours(7);
       date.setMinutes(50);
       await this.congratulateEmployee(congratulationDay.employeeToCongratulate2, date);
     }
