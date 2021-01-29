@@ -1,7 +1,5 @@
 import {CongratulationDay} from "../domain/CongratulationDay";
-import {SlackUser} from "../domain/SlackUser";
 import {IEmployeeRepository} from "../repository/EmployeeRepository";
-import {SlackService} from "./SlackService";
 
 class AnniversaryService {
   private employeeRepository: IEmployeeRepository;
@@ -10,14 +8,28 @@ class AnniversaryService {
     this.employeeRepository = employeeRepository;
   }
 
-  public getEmployeeToCongratulateToday(date: Date): CongratulationDay {
+  /**
+   * Returns an object containing the employees that should be congratulated today 
+   * 
+   * @param date 
+   */
+  public getEmployeesToCongratulateToday(date: Date): CongratulationDay {
     const employee = this.getCongratulationsForThisMonth(date)
-    .find((day) => day.date.getDate() === date.getDate());
-    console.log("Employee to congratulate today: " + JSON.stringify(employee));
+        .find((day) => day.date.getDate() === date.getDate());
+    console.log("Employees to congratulate today: " + JSON.stringify(employee));
     return employee;
   }
-
-  private getCongratulationsForThisMonth(date: Date){
+  
+  /**
+   * Returns the days in this month when congratulation messages are sent with the employees
+   * that should be congratulated on those days
+   * 
+   * @param date current date
+   */
+  private getCongratulationsForThisMonth(date: Date): Array<CongratulationDay> {
+    // sort the employees based on the years in the company
+    // this way the oldest employees will get priority if there are more
+    // people to be congratulated than there are free slots on an available day
     const peopleWithAnniversaryThisMonth = this.employeeRepository.findAllEmployees()
         .filter((e) => e.presence[0].start.getMonth() == date.getMonth())
         .filter((e) => e.presence[0].start.getFullYear() !== date.getFullYear())
@@ -27,18 +39,32 @@ class AnniversaryService {
 
     peopleWithAnniversaryThisMonth.forEach((employee) => {
       congratulationDaysInThisMonth
+        // sort the days based on which is closest to the anniversary date,
+        // this way the message will be sent as close to the actual date as possible
         .sort((d1, d2) => Math.abs(d1.date.getDate() - 
           employee.presence[0].start.getDate()) - Math.abs(d2.date.getDate() - employee.presence[0].start.getDate()));
+          // find a free slot for the employee to be congratulated
+          // each available day has 2 slots
           for(let day of congratulationDaysInThisMonth){
-            if(day.employeeToCongratulate == null){
-              day.employeeToCongratulate = employee;
+            
+            if(day.employeeToCongratulate1 == null) {
+              day.employeeToCongratulate1 = employee;
+              break;
+            } else if(day.employeeToCongratulate2 == null){
+              day.employeeToCongratulate2 = employee;
               break;
             }
+
           }
     });
     return congratulationDaysInThisMonth;
   }
-
+  
+  /**
+   * Returns the days when congratulations can be sent (work days)
+   * 
+   * @param d current date
+   */
   private getCongratulationDaysForThisMonth(d: Date): Array<CongratulationDay> {
     const date = new Date();
     date.setTime(d.getTime());
