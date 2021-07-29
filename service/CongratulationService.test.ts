@@ -13,7 +13,8 @@ const service = new CongratulationService(anniversaryService, slackService);
 
 it("Sends message without tag", async () => {
   const now = new Date("2020-02-06");
-  slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
+  //slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
+  slackService.getUsers = jest.fn(() => Promise.resolve([]));
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
@@ -28,7 +29,8 @@ it("Sends message without tag", async () => {
 
 it("Sends message with tag", async () => {
   const now = new Date("2020-02-06");
-  slackService.getChannelUsers = jest.fn(() => Promise.resolve([new SlackUser("id", "User Name", "asd@asd.com")]));
+  //slackService.getChannelUsers = jest.fn(() => Promise.resolve([new SlackUser("id", "User Name", "asd@asd.com")]));
+  slackService.getUsers = jest.fn(() => Promise.resolve([new SlackUser("id", "User Name", "asd@asd.com")]));
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
@@ -43,7 +45,8 @@ it("Sends message with tag", async () => {
 
 it("Sends 2 message if there are 2 persons to congratulate", async () => {
   const now = new Date("2020-02-06");
-  slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
+  //slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
+  slackService.getUsers = jest.fn(() => Promise.resolve([]));
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);

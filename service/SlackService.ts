@@ -1,5 +1,4 @@
-import * as request from "request-promise";
-
+import axios from "axios";
 import { SlackConfiguration } from "../domain/SlackConfiguration";
 import { SlackUser } from "../domain/SlackUser";
 
@@ -16,74 +15,36 @@ class SlackService {
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
     } else {
-      return request.post(
-          url,
+      const messageBody = {
+        channel: this.slackConfiguration.channelId,
+        // unix timestamp
+        post_at: date.getTime() / 1000,
+        text: message,
+        blocks: [
           {
-            json: {
-              channel: this.slackConfiguration.channelId,
-              // unix timestamp
-              post_at: date.getTime() / 1000,
-              text: message,
-              blocks: [
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: message
-                  }
-                },
-                {
-                  type: "context",
-                  elements: [
-                    {
-                      type: "mrkdwn",
-                      text: contextMessage
-                    }
-                  ]
-                }
-              ]
-            },
-            auth: {
-              bearer: this.slackConfiguration.appToken
-            },
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: message
+            }
           },
-      );
-    }
-  }
-
-  public sendMessage(message: string, contextMessage: string) {
-    const url = this.slackConfiguration.webhookUrl;
-    console.log("Send to slack " + message + ", url context message " + contextMessage + ", url " + url);
-
-    if (this.slackConfiguration.dryRun) {
-      return Promise.resolve(message);
-    } else {
-      return request.post(
-          url,
           {
-            json: {
-              text: message,
-              blocks: [
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: message
-                  }
-                },
-                {
-                  type: "context",
-                  elements: [
-                    {
-                      type: "mrkdwn",
-                      text: contextMessage
-                    }
-                  ]
-                }
-              ]
-            },
-          },
-      );
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: contextMessage
+              }
+            ]
+          }
+        ]
+      };
+      console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
+      return axios.post(url, messageBody, {
+        headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
+      }).then((response) => {
+        console.info("Message scheduled: ", response.status, response.statusText);
+      })
     }
   }
 
@@ -97,31 +58,26 @@ class SlackService {
     return filteredUsers;
   }
 
-  private getUsers(): Promise<ReadonlyArray<SlackUser>> {
-    const url = "https://slack.com/api/users.list?token=" + this.slackConfiguration.appToken;
+  public getUsers(): Promise<ReadonlyArray<SlackUser>> {
+    const url = "https://slack.com/api/users.list"
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve([]);
     } else {
-      return request.get(url)
-        .then((response) => JSON.parse(response).members
-          .map((member) => new SlackUser(member.id, member.profile.real_name, member.profile.email)));
+      return axios.get(url, {
+        headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
+      })
+        .then((response) => {
+          // TODO missing paging with cursors
+          return response.data.members
+           .map((member: any) => new SlackUser(member.id, member.profile.real_name, member.profile.email))
+        });
     }
   }
 
+  // https://api.slack.com/methods/channels.info
+  // channels.info is deprecated, replaced by conversations.info or conversations.members
   private getChannelUsersIds(): Promise<ReadonlyArray<string>>{
-    const url = "https://slack.com/api/channels.info?token=" + this.slackConfiguration.appToken;
-    if (this.slackConfiguration.dryRun) {
-      return Promise.resolve([]);
-    } else {
-      return request.post(
-          url,
-          {
-            form: {
-              channel: this.slackConfiguration.channelId,
-            },
-          },
-      ).then((response) => JSON.parse(response).channel.members);
-    }
+    return Promise.resolve([]);
   }
 }
 

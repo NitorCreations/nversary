@@ -6,7 +6,7 @@ class SlackUser {
   constructor(id: string, realName: string, email: string) {
     this.id = id;
     this.realName = realName;
-    this.email =  email;
+    this.email = email;
   }
 }
 

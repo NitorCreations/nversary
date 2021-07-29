@@ -44,9 +44,11 @@ class CongratulationService {
     const yearsAtCompany: number = this.yearsPresent(employee, messageTime);
     const startDate = employee.presence[0].start;
     const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
-    const message: string = `Congratulations *${employee.fullName}* ${tag ? tag + " " : ""}` +
+    const userTag = tag ? tag + " " : "";
+    const message: string = `Congratulations *${employee.fullName}* ${userTag}` +
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
     const contextMessage = `${employee.fullName} started at Nitor on ${startDateStr}`;
+    // TODO display current subcompany and title?
     await this.slackService.scheduleMessage(message, contextMessage, messageTime);
   }
 
@@ -55,10 +57,10 @@ class CongratulationService {
   }
 
   public async getTag(email: string): Promise<string> {
-    const user: SlackUser = (await this.slackService.getChannelUsers()).filter((u) => u.email === email).pop();
-    return Promise.resolve(user ? "<@" + user.id  + ">": null);
+    // TODO should only show tag if user is in current channel?
+    const user: SlackUser = (await this.slackService.getUsers()).filter((u) => u.email === email).pop();
+    return Promise.resolve(user ? `<@${user.id}>`: null);
   }
 }
 
 export { CongratulationService };
-
