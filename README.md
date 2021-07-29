@@ -18,35 +18,26 @@ An AWS Account is required. If you don't have one, create it at https://aws.amaz
 - In OAuhth & Permissions, add three scopes: `users:read`, `users:read.email` and `channels:read`
 - Save the OAuth access token
 
+
+
 ### Serverless framework
 nversary uses serverless framework to deploy nversary
 - Install serverless framework: https://serverless.com/framework/docs/getting-started/
 
-### AWS User
-To deploy and run nversary, a user is needed for the AWS services.
-Create a new user to your AWS account
-- In AWS Services Console go to IAM
-- Select 'Users' -> 'Add User'
-- Create User 'nversary-admin', (enable programmatic access) and click 'Next'
-- Choose Attach existing policies directly
-- Click the check box next to AdministratorAccess and click 'Next: Review'
-- Click 'Create User'
-- Take note of the Access key ID and Secret access key
-
-### AWS Profile
-To deploy nversary by the user created in the previous step, an aws profile is required
-- run command 'serverless config credentials --provider aws --key access-key-id-here --secret secret-access-key-here --profile nversary'
 
 ### Deploy to AWS
-- Run 'serverless deploy --aws-profile nversary'
+nversary in configured with environment variables and SSM parameters.
 
-### Configuration
-Configure the Lambda function that was created by Serverless
-* Open AWS Console, choose Services -> Lambda
-* Open the nversary-dev-nversaryGreeter function in aws console and add the following environment variables:
-  * slack_webhook_url (the webhook url from the Slack configuration step)
-  * slack_channel_id (the id of channel you are posting to)
-  * slack_app_token (the OAuth access token created earlier)
+- `PEOPLE_S3_BUCKET` defines the S3 bucket within the same AWS account where people.json is stored.
+- `PEOPLE_S3_KEY` defines the key for people.json inside the S3 bucket.
+- `SSM_PARAMETER_NAME` defines SSM parameter name where Slack configuration is stored.
+
+```
+export PEOPLE_S3_BUCKET=my-bucket
+export PEOPLE_S3_KEY=some/path/people.json
+export SSM_PARAMETER_NAME=/nversary/config
+sls deploy
+```
 
 ### Testing
 You can test the Lambda function from AWS Lambda console by creating a test event with a 'dateString' attribute. The date string should be in 'yyyy/mm/dd' format.
