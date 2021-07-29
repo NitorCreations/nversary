@@ -15,3 +15,6 @@ functions:
     handler: handler.greeter
     events:
     - schedule: cron(50 3 * * ? *)
+    environment:
+      PEOPLE_S3_URL: TODO
+      SSM_PARAMETER_NAME: TODO

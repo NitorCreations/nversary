@@ -1,11 +1,9 @@
 import { CongratulationDay } from "../domain/CongratulationDay";
-import {Employee} from "../domain/Employee";
-import {Presence} from "../domain/Presence";
-import {SlackConfiguration} from "../domain/SlackConfiguration";
-import {SlackUser} from "../domain/SlackUser";
-import {EmployeeRepositoryLocalImpl} from "../repository/EmployeeRepositoryLocalImpl";
+import { Employee } from "../domain/Employee";
+import { Presence } from "../domain/Presence";
+import { SlackUser } from "../domain/SlackUser";
 import { AnniversaryService } from "./AnniversaryService";
-import {CongratulationService} from "./CongratulationService";
+import { CongratulationService } from "./CongratulationService";
 import { SlackService } from "./SlackService";
 
 const anniversaryService = new AnniversaryService(null);

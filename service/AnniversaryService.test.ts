@@ -1,8 +1,5 @@
-import {Employee} from "../domain/Employee";
-import {SlackConfiguration} from "../domain/SlackConfiguration";
-import {EmployeeRepositoryLocalImpl} from "../repository/EmployeeRepositoryLocalImpl";
-import {AnniversaryService} from "./AnniversaryService";
-import {SlackService} from "./SlackService";
+import { EmployeeRepositoryLocalImpl } from "../repository/EmployeeRepositoryLocalImpl";
+import { AnniversaryService } from "./AnniversaryService";
 
 /**
  * Employees 1, 2 and 3 have started on the same date.

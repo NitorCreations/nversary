@@ -4,4 +4,4 @@ interface INversaryEvent extends ScheduledEvent {
   dateString : string;
 }
 
-export {INversaryEvent};
+export { INversaryEvent };

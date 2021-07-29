@@ -1,7 +1,7 @@
 import * as request from "request-promise";
 
-import {SlackConfiguration} from "../domain/SlackConfiguration";
-import {SlackUser} from "../domain/SlackUser";
+import { SlackConfiguration } from "../domain/SlackConfiguration";
+import { SlackUser } from "../domain/SlackUser";
 
 class SlackService {
   public slackConfiguration: SlackConfiguration;
@@ -125,4 +125,4 @@ class SlackService {
   }
 }
 
-export {SlackService};
+export { SlackService };

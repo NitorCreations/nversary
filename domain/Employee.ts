@@ -1,4 +1,4 @@
-import {Presence} from "./Presence";
+import { Presence } from "./Presence";
 
 class Employee {
   public fullName: string;
@@ -12,4 +12,4 @@ class Employee {
   }
 }
 
-export {Employee};
+export { Employee };

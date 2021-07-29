@@ -10,4 +10,4 @@ class CongratulationDay {
     }
 }
 
-export {CongratulationDay};
+export { CongratulationDay };

@@ -1,6 +1,6 @@
-import {Employee} from "../domain/Employee";
-import {Presence} from "../domain/Presence";
-import {IEmployeeRepository} from "./EmployeeRepository";
+import { Employee } from "../domain/Employee";
+import { Presence } from "../domain/Presence";
+import { IEmployeeRepository } from "./EmployeeRepository";
 
 class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
 
@@ -16,4 +16,4 @@ class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
   }
 }
 
-export {EmployeeRepositoryLocalImpl};
+export { EmployeeRepositoryLocalImpl };

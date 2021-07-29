@@ -1,5 +1,5 @@
-import {CongratulationDay} from "../domain/CongratulationDay";
-import {IEmployeeRepository} from "../repository/EmployeeRepository";
+import { CongratulationDay } from "../domain/CongratulationDay";
+import { IEmployeeRepository } from "../repository/EmployeeRepository";
 
 class AnniversaryService {
   private employeeRepository: IEmployeeRepository;
@@ -87,4 +87,4 @@ class AnniversaryService {
   }
 }
 
-export {AnniversaryService};
+export { AnniversaryService };
