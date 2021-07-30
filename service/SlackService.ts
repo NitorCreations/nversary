@@ -22,7 +22,7 @@ class SlackService {
     const messageBody: any = {
       channel: this.slackConfiguration.channelId,
       // unix timestamp
-      post_at: date.getTime() / 1000,
+      post_at: Math.ceil(date.getTime() / 1000),
       text: message,
       blocks: [
         {
