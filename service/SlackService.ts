@@ -13,7 +13,7 @@ class SlackService {
    * Post a scheduled message.
    * https://api.slack.com/methods/chat.scheduleMessage
    */
-  public scheduleMessage(message: string, contextMessage: string, date: Date) {
+  public scheduleMessage(message: string, contextMessage: string, titleMessage: string, date: Date) {
     
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
@@ -38,6 +38,15 @@ class SlackService {
             {
               type: "mrkdwn",
               text: contextMessage
+            }
+          ]
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: titleMessage
             }
           ]
         }

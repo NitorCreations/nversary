@@ -12,7 +12,12 @@ class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
 
   public findAllEmployees(): ReadonlyArray<Employee> {
     const people: any[] = (this.data as any).people;
-    return people.map((p) => new Employee(p.fullName, p.email, p.presence.map(pres => new Presence(new Date(pres.start)))));
+    return people.map((p) => new Employee(
+      p.fullName,
+      p.email,
+      p.presence.map((pres: any) => new Presence(new Date(pres.start))),
+      p.position,
+      p.subcompany));
   }
 }
 
