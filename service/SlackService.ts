@@ -14,42 +14,48 @@ class SlackService {
    * https://api.slack.com/methods/chat.scheduleMessage
    */
   public scheduleMessage(message: string, contextMessage: string, date: Date) {
-    const url = "https://slack.com/api/chat.scheduleMessage";
     
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
-    } else {
-      const messageBody = {
-        channel: this.slackConfiguration.channelId,
-        // unix timestamp
-        post_at: date.getTime() / 1000,
-        text: message,
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: message
-            }
-          },
-          {
-            type: "context",
-            elements: [
-              {
-                type: "mrkdwn",
-                text: contextMessage
-              }
-            ]
-          }
-        ]
-      };
-      console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
-      return axios.post(url, messageBody, {
-        headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
-      }).then((response) => {
-        console.info("Message scheduled: ", response.status, response.statusText);
-      })
     }
+    const url = "https://slack.com/api/chat.scheduleMessage";
+    const messageBody: any = {
+      channel: this.slackConfiguration.channelId,
+      // unix timestamp
+      post_at: date.getTime() / 1000,
+      text: message,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: message
+          }
+        },
+        {
+          type: "context",
+          elements: [
+            {
+              type: "mrkdwn",
+              text: contextMessage
+            }
+          ]
+        }
+      ]
+    };
+
+    console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
+    return axios.post(url, messageBody, {
+      headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
+    }).then((response) => {
+      if (!response.data.ok) {
+        console.error('Failed to post message', response.data);
+        throw Error(`Message sending failed: ${JSON.stringify(response.data)}`);
+      } else {
+        console.info("Message scheduled: ", response.status, response.statusText);
+        console.info("Response data: ", response.data);
+      }
+    })
   }
 
   public async getChannelUsers(): Promise<ReadonlyArray<SlackUser>>{
