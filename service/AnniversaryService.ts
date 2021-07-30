@@ -13,11 +13,11 @@ class AnniversaryService {
    * 
    * @param date 
    */
-  public getEmployeesToCongratulateToday(date: Date): CongratulationDay | undefined {
-    const employee = this.getCongratulationsForThisMonth(date)
+  public getEmployeesToCongratulateToday(date: Date, maxPerDay: number): CongratulationDay | undefined {
+    const congrats = this.getCongratulationsForThisMonth(date, maxPerDay)
         .find((day) => day.date.getDate() === date.getDate());
-    console.log("Employees to congratulate today: " + JSON.stringify(employee));
-    return employee;
+    console.log("Employees to congratulate today: " + JSON.stringify(congrats));
+    return congrats;
   }
   
   /**
@@ -26,7 +26,7 @@ class AnniversaryService {
    * 
    * @param date current date
    */
-  private getCongratulationsForThisMonth(date: Date): Array<CongratulationDay> {
+  private getCongratulationsForThisMonth(date: Date, maxPerDay: number): Array<CongratulationDay> {
     // sort the employees based on the years in the company
     // this way the oldest employees will get priority if there are more
     // people to be congratulated than there are free slots on an available day
@@ -36,7 +36,6 @@ class AnniversaryService {
         .sort((e1, e2) => e1.presence[0].start.getFullYear() - e2.presence[0].start.getFullYear());
 
     const congratulationDaysInThisMonth = this.getCongratulationDaysForThisMonth(date);
-
     peopleWithAnniversaryThisMonth.forEach((employee) => {
       congratulationDaysInThisMonth
         // sort the days based on which is closest to the anniversary date,
@@ -44,17 +43,12 @@ class AnniversaryService {
         .sort((d1, d2) => Math.abs(d1.date.getDate() - 
           employee.presence[0].start.getDate()) - Math.abs(d2.date.getDate() - employee.presence[0].start.getDate()));
           // find a free slot for the employee to be congratulated
-          // each available day has 2 slots
+          // each available day has N slots
           for(let day of congratulationDaysInThisMonth){
-            
-            if(day.employeeToCongratulate1 == null) {
-              day.employeeToCongratulate1 = employee;
-              break;
-            } else if(day.employeeToCongratulate2 == null){
-              day.employeeToCongratulate2 = employee;
+            if (day.employees.length < maxPerDay) {
+              day.employees.push(employee);
               break;
             }
-
           }
     });
     return congratulationDaysInThisMonth;

@@ -18,9 +18,10 @@ it("Sends message without tag", async () => {
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd@asd.com",
-    [new Presence(new Date("2018-02-06"))], "Senior Architect", "Software Company Oy");
-  anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
+  congratulationDay.employees = [
+    new Employee("Employee 1", "asd@asd.com", [new Presence(new Date("2018-02-06"))], "Senior Architect", "Software Company Oy")
+  ];
+  anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date, maxPerDay: number) => congratulationDay);
 
   await service.congratulate(now, false);
   const sendTime = new Date("2020-02-06T11:40:00Z")
@@ -38,8 +39,10 @@ it("Sends message with tag", async () => {
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd@asd.com",
-    [new Presence(new Date("2018-02-06"))], "Senior Architect", "Software Company Oy");
+  congratulationDay.employees = [
+    new Employee("Employee 1", "asd@asd.com",
+      [new Presence(new Date("2018-02-06"))], "Senior Architect", "Software Company Oy")
+  ];
   anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now, false);
@@ -58,10 +61,12 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd1@asd.com",
-    [new Presence(new Date("2017-02-06"))], "Senior Architect", "Software Company Oy");
-    congratulationDay.employeeToCongratulate2 = new Employee("Employee 2", "asd2@asd.com",
-    [new Presence(new Date("2018-02-06"))], "Junior Architect", "Other Company Oy");
+  congratulationDay.employees = [
+    new Employee("Employee 1", "asd1@asd.com",
+      [new Presence(new Date("2017-02-06"))], "Senior Architect", "Software Company Oy"),
+    new Employee("Employee 2", "asd2@asd.com",
+      [new Presence(new Date("2018-02-06"))], "Junior Architect", "Other Company Oy")
+  ];
   anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now, false);
@@ -87,10 +92,12 @@ it("Sends messages immediately if sendImmediately=true", async () => {
   slackService.scheduleMessage = jest.fn((message, contextMessage, now) => Promise.resolve());
 
   const congratulationDay = new CongratulationDay(now);
-  congratulationDay.employeeToCongratulate1 = new Employee("Employee 1", "asd1@asd.com",
-    [new Presence(new Date("2017-02-06"))], "Senior Architect", "Software Company Oy");
-    congratulationDay.employeeToCongratulate2 = new Employee("Employee 2", "asd2@asd.com",
-    [new Presence(new Date("2018-02-06"))], "Junior Architect", "Other Company Oy");
+  congratulationDay.employees = [
+    new Employee("Employee 1", "asd1@asd.com",
+      [new Presence(new Date("2017-02-06"))], "Senior Architect", "Software Company Oy"),
+    new Employee("Employee 2", "asd2@asd.com",
+      [new Presence(new Date("2018-02-06"))], "Junior Architect", "Other Company Oy")
+  ];
   anniversaryService.getEmployeesToCongratulateToday = jest.fn((date: Date) => congratulationDay);
 
   await service.congratulate(now, true);

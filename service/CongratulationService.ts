@@ -15,25 +15,30 @@ class CongratulationService {
 
   public async congratulate(date: Date, sendImmediately: boolean): Promise<void> {
     console.log("Congratulate on " + date);
+    
+    const sendTimes = [
+      // send the message at 11:40 UTC (13:40 or 14:40 Finnish time)
+      this.calculateSendTime(date, 11, 40),
+      // send the message at 7:50 UTC (9:50 or 10:50 Finnish time)
+      this.calculateSendTime(date, 7, 50),
+      // TODO currently using only 2 slots per day
+      // send the message at 9:45 UTC (11:45 or 12:45 Finnish time)
+      // this.calculateSendTime(date, 9, 45),
+    ];
 
-    const congratulationDay : CongratulationDay | undefined = this.anniversaryService.getEmployeesToCongratulateToday(date);
+    const maxPerDay = sendTimes.length;
+    const congratulationDay : CongratulationDay | undefined = this.anniversaryService.getEmployeesToCongratulateToday(date, maxPerDay);
 
-    if(!congratulationDay || !congratulationDay.employeeToCongratulate1){
+    if(!congratulationDay || congratulationDay.employees.length < 1){
       console.log("No employees to congratulate today");
       return;
     }
-
-    if(congratulationDay.employeeToCongratulate1){
-      // send the first message at 11:40 UTC
-      const sendDate = this.calculateSendTime(date, 11, 40);
-      await this.congratulateEmployee(congratulationDay.employeeToCongratulate1, sendDate, sendImmediately);
+    
+    for (let index = 0; index < congratulationDay.employees.length; index ++) {
+      const employee = congratulationDay.employees[index];
+      const sendTime = sendTimes[index];
+      await this.congratulateEmployee(employee, sendTime, sendImmediately);
     }
-    if(congratulationDay.employeeToCongratulate2){
-      // send the second message at 7:50 UTC
-      const sendDate = this.calculateSendTime(date, 7, 50);
-      await this.congratulateEmployee(congratulationDay.employeeToCongratulate2, sendDate, sendImmediately);
-    }
-
     return Promise.resolve();
   }
 
