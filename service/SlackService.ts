@@ -9,6 +9,10 @@ class SlackService {
     this.slackConfiguration = slackConfiguration;
   }
 
+  /**
+   * Post a scheduled message.
+   * https://api.slack.com/methods/chat.scheduleMessage
+   */
   public scheduleMessage(message: string, contextMessage: string, date: Date) {
     const url = "https://slack.com/api/chat.scheduleMessage";
     
@@ -58,6 +62,10 @@ class SlackService {
     return filteredUsers;
   }
 
+  /**
+   * Fetch list of all users.
+   * https://api.slack.com/methods/users.list
+   */
   public getUsers(): Promise<ReadonlyArray<SlackUser>> {
     const url = "https://slack.com/api/users.list"
     if (this.slackConfiguration.dryRun) {
