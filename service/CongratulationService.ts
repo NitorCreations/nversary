@@ -53,7 +53,8 @@ class CongratulationService {
     const message: string = `Congratulations *${employee.fullName}* ${userTag}` +
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
     const contextMessage = `${employee.fullName} started at Nitor on ${startDateStr}`;
-    // TODO display current subcompany and title?
+    // TODO display current subcompany and title
+    // TODO display profile image
     if (sendImmediately) {
       const sendTime = new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 15000);
       await this.slackService.scheduleMessage(message, contextMessage, sendTime);
@@ -68,8 +69,9 @@ class CongratulationService {
 
   public async getTag(email: string): Promise<string | null> {
     // TODO should only show tag if user is in current channel?
-    const user: SlackUser | undefined = (await this.slackService.getUsers()).filter((u) => u.email === email).pop();
-    return Promise.resolve(user ? `<@${user.id}>`: null);
+    const users = await this.slackService.getUsers();
+    const user: SlackUser | undefined = users.filter((u) => u.email === email).pop();
+    return Promise.resolve((user && user.email) ? `<@${user.id}>` : null);
   }
 }
 

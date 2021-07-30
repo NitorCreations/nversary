@@ -53,9 +53,9 @@ class SlackService {
         throw Error(`Message sending failed: ${JSON.stringify(response.data)}`);
       } else {
         console.info("Message scheduled: ", response.status, response.statusText);
-        console.info("Response data: ", response.data);
+        console.info("Response data: ", JSON.stringify(response.data, null, 2));
       }
-    })
+    });
   }
 
   public async getChannelUsers(): Promise<ReadonlyArray<SlackUser>>{
