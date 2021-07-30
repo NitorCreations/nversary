@@ -11,13 +11,28 @@ To build the project run 'serverless package' in the project directory
 An AWS Account is required. If you don't have one, create it at https://aws.amazon.com/
 
 ### Slack
+
 - Go to https://api.slack.com/apps and click Create New App, give your app a name and attach it to a workspace
 - In Basic Configuration, from Add features and functionality, choose 'Incoming Webhooks' and turn the feature on from the switch
-- Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
-- Copy the webhook url for later use
-- In OAuhth & Permissions, add three scopes: `users:read`, `users:read.email` and `channels:read`
-- Save the OAuth access token
+  - Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
+  - Copy the webhook url for later use
+- In OAuth & Permissions, add three scopes: `users:read`, `users:read.email` and `channels:read`
+  - Save the Bot User OAuth Token
+- Store credentials to AWS SSM Parameter Store, as SecureString
 
+The JSON in SSM Parameter Store looks similar to this:
+```json
+{
+  "slack": {
+    "webhookUrl": "https://hooks.slack.com/services/K2XSOISE/BJV2AO25W6X/lkfKssiXivpo0KawovOs",
+    "appToken": "xoxb-32896343824-849329924324243-lkjrewrwXKhgkDkfobo4dore",
+    "channelId": "JO3KFSO5"
+  }
+}
+```
+- `webhookUrl` is *Webhook URL* from *Features/Incoming Webhooks*.
+- `appToken` is *Bot User OAuth Token* from *Features/OAuth & Permissions*.
+- `channelId` is the identifier for channel where messages are sent. You can obtain this from Slack UI/Chat app. 
 
 
 ### Serverless framework
