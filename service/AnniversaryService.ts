@@ -1,5 +1,5 @@
-import {CongratulationDay} from "../domain/CongratulationDay";
-import {IEmployeeRepository} from "../repository/EmployeeRepository";
+import { CongratulationDay } from "../domain/CongratulationDay";
+import { IEmployeeRepository } from "../repository/EmployeeRepository";
 
 class AnniversaryService {
   private employeeRepository: IEmployeeRepository;
@@ -13,7 +13,7 @@ class AnniversaryService {
    * 
    * @param date 
    */
-  public getEmployeesToCongratulateToday(date: Date): CongratulationDay {
+  public getEmployeesToCongratulateToday(date: Date): CongratulationDay | undefined {
     const employee = this.getCongratulationsForThisMonth(date)
         .find((day) => day.date.getDate() === date.getDate());
     console.log("Employees to congratulate today: " + JSON.stringify(employee));
@@ -69,7 +69,7 @@ class AnniversaryService {
     const date = new Date();
     date.setTime(d.getTime());
     const currentMonth = date.getMonth();
-    const days = [];
+    const days: Array<CongratulationDay> = [];
     
     for(let i = 1; i < 31; i++){
         date.setDate(i);
@@ -87,4 +87,4 @@ class AnniversaryService {
   }
 }
 
-export {AnniversaryService};
+export { AnniversaryService };

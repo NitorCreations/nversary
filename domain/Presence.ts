@@ -6,4 +6,4 @@ class Presence {
   }
 }
 
-export {Presence};
+export { Presence };

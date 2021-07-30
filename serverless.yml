@@ -1,17 +1,35 @@
-service:
-  name: nversary
+service: nversary
 
-# Add the serverless-webpack plugin
+frameworkVersion: '2'
+
 plugins:
-  - serverless-webpack
+  - serverless-plugin-typescript
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   region: eu-west-1
+  lambdaHashingVersion: 20201221
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - 'ssm:GetParameter'
+          Resource:
+            Fn::Sub: "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${env:SSM_PARAMETER_NAME}"
+        - Effect: 'Allow'
+          Action:
+            - 's3:GetObject'
+          Resource:
+            - "arn:aws:s3:::${env:PEOPLE_S3_BUCKET}/${env:PEOPLE_S3_KEY}"
 
 functions:
   nversaryGreeter:
     handler: handler.greeter
     events:
-    - schedule: cron(50 3 * * ? *)
+      - schedule: cron(50 3 * * ? *)
+    environment:
+      PEOPLE_S3_BUCKET: ${env:PEOPLE_S3_BUCKET}
+      PEOPLE_S3_KEY: ${env:PEOPLE_S3_KEY}
+      SSM_PARAMETER_NAME: ${env:SSM_PARAMETER_NAME}
