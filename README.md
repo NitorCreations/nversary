@@ -16,9 +16,10 @@ An AWS Account is required. If you don't have one, create it at https://aws.amaz
 - In Basic Configuration, from Add features and functionality, choose 'Incoming Webhooks' and turn the feature on from the switch
   - Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
   - Copy the webhook url for later use
-- In OAuth & Permissions, add three scopes: `users:read`, `users:read.email` and `channels:read`
+- In OAuth & Permissions, add three scopes: `chat:write`, `users:read`, `users:read.email` and `channels:read`
   - Save the Bot User OAuth Token
 - Store credentials to AWS SSM Parameter Store, as SecureString
+- Invite bot to channel: `/invite @botname`
 
 The JSON in SSM Parameter Store looks similar to this:
 ```json
@@ -55,7 +56,12 @@ sls deploy
 ```
 
 ### Testing
-You can test the Lambda function from AWS Lambda console by creating a test event with a 'dateString' attribute. The date string should be in 'yyyy/mm/dd' format.
+You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute. The date string should be in 'yyyy-MM-dd' format. Setting `sendNow` to true, will send messages
+immediately.
+
 
 (Optional) Modify the interval of notifications
 * serverless.yml contains the cron expression which defines when the code is executed
+
+# TODO
+- incoming webhook is not needed? Sending happens via scheduleMessage method.
