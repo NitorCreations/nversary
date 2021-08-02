@@ -59,7 +59,7 @@ class CongratulationService {
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
     const contextMessage = `${employee.fullName} started at Nitor on ${startDateStr}`;
     const positionMessage = `${employee.fullName} works as ${employee.position} at ${employee.subcompany}`;
-    // TODO display current subcompany and title
+    // TODO display special messages when yearsAtCompay == 5
     // TODO display profile image
     if (sendImmediately) {
       const sendTime = new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 15000);
