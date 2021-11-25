@@ -16,6 +16,7 @@ class CongratulationService {
   public async congratulate(date: Date, sendImmediately: boolean): Promise<void> {
     console.log("Congratulate on " + date);
     
+    // TODO if you change this, deploy change only at change month, otherwise some anniversaries may be duplicated or missed
     const sendTimes = [
       // send the message at 11:40 UTC (13:40 or 14:40 Finnish time)
       this.calculateSendTime(date, 11, 40),
@@ -55,18 +56,27 @@ class CongratulationService {
     const startDate = employee.presence[0].start;
     const startDateStr = `${startDate.getDate()}.${startDate.getMonth() + 1}.${startDate.getFullYear()}`;
     const userTag = tag ? tag + " " : "";
-    const message: string = `Congratulations *${employee.fullName}* ${userTag}` +
-      `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
-    const contextMessage = `${employee.fullName} started at Nitor on ${startDateStr}`;
-    const positionMessage = `${employee.fullName} works as ${employee.position} at ${employee.subcompany}`;
-    // TODO display special messages when yearsAtCompay == 5
-    // TODO display profile image
-    if (sendImmediately) {
-      const sendTime = new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 15000);
-      await this.slackService.scheduleMessage(message, contextMessage, positionMessage, sendTime);
-    } else {
-      await this.slackService.scheduleMessage(message, contextMessage, positionMessage, messageTime);
+    var yearEmojis = '';
+    if (yearsAtCompany >= 10) {
+      yearEmojis = ":palm_tree::palm_tree:";
+    } else if (yearsAtCompany >= 5) {
+      yearEmojis = ":palm_tree:";
     }
+    const message: string = `Congratulations *${employee.fullName}* ${userTag}` +
+      `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:${yearEmojis}`;
+    const firstName = employee.fullName.replace(/ .*/, '');
+    const contextMessages: string[] = [
+      `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} at ${employee.subcompany}.`
+    ];
+
+    if (yearsAtCompany === 5) {
+      contextMessages.push('Achievement Unlocked: Nitor Nestori! :palm_tree:')
+    } else if (yearsAtCompany == 10) {
+      contextMessages.push('Achievement Unlocked: Nitor Fellow! :palm_tree::palm_tree:')
+    }
+
+    const sendTime = sendImmediately ? new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 10000) : messageTime;
+    await this.slackService.scheduleMessage(message, contextMessages, employee.profileImageUrl, sendTime);
   }
 
   public yearsPresent(employee: Employee, now: Date): number {

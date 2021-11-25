@@ -6,7 +6,8 @@
       },
       {
         "fullName": "Hemppa Könönen",
-        "presence": [{"start": "2012-07-01"}]
+        "presence": [{"start": "2012-07-01"}],
+        "profileImageUrl": "https://example.com/image.jpg"
       }
     ]
 }

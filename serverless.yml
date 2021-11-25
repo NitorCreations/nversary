@@ -27,6 +27,7 @@ provider:
 functions:
   nversaryGreeter:
     handler: handler.greeter
+    description: Sends work anniversary greetings to Slack channel. Runs daily.
     events:
       - schedule: cron(50 3 * * ? *)
     environment:

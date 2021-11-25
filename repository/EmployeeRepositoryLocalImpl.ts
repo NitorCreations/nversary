@@ -17,7 +17,8 @@ class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
       p.email,
       p.presence.map((pres: any) => new Presence(new Date(pres.start))),
       p.position,
-      p.subcompany));
+      p.subcompany,
+      p.profileImageUrl));
   }
 }
 

@@ -13,49 +13,42 @@ class SlackService {
    * Post a scheduled message.
    * https://api.slack.com/methods/chat.scheduleMessage
    */
-  public scheduleMessage(message: string, contextMessage: string, titleMessage: string, date: Date) {
+  public scheduleMessage(message: string, contextMessages: string[], profileImageUrl: string | undefined, date: Date) {
     
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
     }
     const url = "https://slack.com/api/chat.scheduleMessage";
+    const section: any = {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: message + '\n\n' + contextMessages.join('\n')
+      }
+    };
+    // TODO need to check if image exists at this point?
+    if (profileImageUrl) {
+      section['accessory'] = {
+        "type": "image",
+        "image_url": profileImageUrl,
+        // TODO remove alt?
+        "alt_text": "images"
+      }
+    }
     const messageBody: any = {
       channel: this.slackConfiguration.channelId,
       // unix timestamp
       post_at: Math.ceil(date.getTime() / 1000),
       text: message,
-      blocks: [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: message
-          }
-        },
-        {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: contextMessage
-            }
-          ]
-        },
-        {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: titleMessage
-            }
-          ]
-        }
-      ]
+      blocks: [section]
     };
 
     console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
     return axios.post(url, messageBody, {
-      headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
+      headers: {
+        'Authorization': `Bearer ${this.slackConfiguration.appToken}`,
+        'Content-Type': 'application/json; charset=utf-8'
+    }
     }).then((response) => {
       if (!response.data.ok) {
         console.error('Failed to post message', response.data);
