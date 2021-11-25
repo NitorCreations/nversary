@@ -60,13 +60,8 @@ class CongratulationService {
     const firstName = employee.fullName.replace(/ .*/, '');
     const contextMessage = `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} at ${employee.subcompany}`;
     // TODO display special messages when yearsAtCompay == 5
-    // TODO display profile image
-    if (sendImmediately) {
-      const sendTime = new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 15000);
-      await this.slackService.scheduleMessage(message, contextMessage, sendTime);
-    } else {
-      await this.slackService.scheduleMessage(message, contextMessage, messageTime);
-    }
+    const sendTime = sendImmediately ? new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 10000) : messageTime;
+    await this.slackService.scheduleMessage(message, contextMessage, employee.profileImageUrl, sendTime);
   }
 
   public yearsPresent(employee: Employee, now: Date): number {

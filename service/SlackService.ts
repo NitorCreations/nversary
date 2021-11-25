@@ -13,35 +13,33 @@ class SlackService {
    * Post a scheduled message.
    * https://api.slack.com/methods/chat.scheduleMessage
    */
-  public scheduleMessage(message: string, contextMessage: string, date: Date) {
+  public scheduleMessage(message: string, contextMessage: string, profileImageUrl: string | undefined, date: Date) {
     
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
     }
     const url = "https://slack.com/api/chat.scheduleMessage";
+    const section: any = {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: message + '\n\n' + contextMessage
+      }
+    };
+    // TODO need to check if image exists at this point?
+    if (profileImageUrl) {
+      section['accessory'] = {
+        "type": "image",
+        "image_url": profileImageUrl,
+        "alt_text": "images"
+      }
+    }
     const messageBody: any = {
       channel: this.slackConfiguration.channelId,
       // unix timestamp
       post_at: Math.ceil(date.getTime() / 1000),
       text: message,
-      blocks: [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: message
-          }
-        },
-        {
-          type: "context",
-          elements: [
-            {
-              type: "mrkdwn",
-              text: contextMessage
-            }
-          ]
-        }
-      ]
+      blocks: [section]
     };
 
     console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
