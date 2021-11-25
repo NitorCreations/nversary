@@ -13,7 +13,7 @@ class SlackService {
    * Post a scheduled message.
    * https://api.slack.com/methods/chat.scheduleMessage
    */
-  public scheduleMessage(message: string, contextMessage: string, profileImageUrl: string | undefined, date: Date) {
+  public scheduleMessage(message: string, contextMessages: string[], profileImageUrl: string | undefined, date: Date) {
     
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
@@ -23,7 +23,7 @@ class SlackService {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: message + '\n\n' + contextMessage
+        text: message + '\n\n' + contextMessages.join('\n')
       }
     };
     // TODO need to check if image exists at this point?
@@ -31,6 +31,7 @@ class SlackService {
       section['accessory'] = {
         "type": "image",
         "image_url": profileImageUrl,
+        // TODO remove alt?
         "alt_text": "images"
       }
     }

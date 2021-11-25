@@ -58,10 +58,12 @@ class CongratulationService {
     const message: string = `Congratulations *${employee.fullName}* ${userTag}` +
       `${yearsAtCompany} ${(yearsAtCompany === 1 ? "year" : "years")} at Nitor! :tada:`;
     const firstName = employee.fullName.replace(/ .*/, '');
-    const contextMessage = `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} at ${employee.subcompany}`;
+    const contextMessages: string[] = [
+      `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} at ${employee.subcompany}`
+    ];
     // TODO display special messages when yearsAtCompay == 5
     const sendTime = sendImmediately ? new Date(Math.ceil(new Date().getTime() / 1000) * 1000 + 10000) : messageTime;
-    await this.slackService.scheduleMessage(message, contextMessage, employee.profileImageUrl, sendTime);
+    await this.slackService.scheduleMessage(message, contextMessages, employee.profileImageUrl, sendTime);
   }
 
   public yearsPresent(employee: Employee, now: Date): number {
