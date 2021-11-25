@@ -45,7 +45,10 @@ class SlackService {
 
     console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
     return axios.post(url, messageBody, {
-      headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
+      headers: {
+        'Authorization': `Bearer ${this.slackConfiguration.appToken}`,
+        'Content-Type': 'application/json; charset=utf-8'
+    }
     }).then((response) => {
       if (!response.data.ok) {
         console.error('Failed to post message', response.data);
