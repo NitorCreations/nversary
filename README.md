@@ -48,6 +48,7 @@ nversary in configured with environment variables and SSM parameters.
 - `PEOPLE_S3_KEY` defines the key for people.json inside the S3 bucket.
 - `SSM_PARAMETER_NAME` defines SSM parameter name where Slack configuration is stored.
 
+Deploying to dev
 ```
 export PEOPLE_S3_BUCKET=my-bucket
 export PEOPLE_S3_KEY=some/path/people.json
@@ -55,7 +56,22 @@ export SSM_PARAMETER_NAME=/nversary/config
 sls deploy
 ```
 
-### Testing
+Deploying to prod
+```
+export PEOPLE_S3_BUCKET=my-bucket
+export PEOPLE_S3_KEY=some/path/people.json
+export SSM_PARAMETER_NAME=/nversary/config
+sls deploy --stage prod
+```
+
+### Unit testing
+
+```
+npm run test
+```
+
+### End to end testing
+
 You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute. The date string should be in 'yyyy-MM-dd' format. Setting `sendNow` to true, will send messages
 immediately.
 
