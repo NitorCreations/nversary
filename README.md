@@ -60,7 +60,7 @@ Deploying to prod
 ```
 export PEOPLE_S3_BUCKET=my-bucket
 export PEOPLE_S3_KEY=some/path/people.json
-export SSM_PARAMETER_NAME=/nversary/config
+export SSM_PARAMETER_NAME=/nversary/config-prod
 sls deploy --stage prod
 ```
 
