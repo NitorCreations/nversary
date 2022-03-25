@@ -1,6 +1,11 @@
 # nversary  - work anniversary notifier
 nversary congratulates people on their work anniversary in Slack
 
+## Functionality
+
+Anniversary messages are sent on working days only and only currently only 2 messages per day. If there are more than two anniversaries
+on the same day, they are spread out so that people that have worked longer, get get the message closer to correct day.
+
 ## Instructions
 How to set up and configure nversary
 
