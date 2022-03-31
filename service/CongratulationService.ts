@@ -22,9 +22,8 @@ class CongratulationService {
       this.calculateSendTime(date, 11, 40),
       // send the message at 7:50 UTC (9:50 or 10:50 Finnish time)
       this.calculateSendTime(date, 7, 50),
-      // TODO currently using only 2 slots per day
       // send the message at 9:45 UTC (11:45 or 12:45 Finnish time)
-      // this.calculateSendTime(date, 9, 45),
+      this.calculateSendTime(date, 9, 45),
     ];
 
     const maxPerDay = sendTimes.length;
