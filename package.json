@@ -7,7 +7,7 @@
     "test": "jest --detectOpenHandles --forceExit --coverage **/*.test.ts"
   },
   "dependencies": {
-    "aws-sdk": "^2..1119.0",
+    "aws-sdk": "^2.1119.0",
     "axios": "^0.26.1"
   },
   "devDependencies": {
