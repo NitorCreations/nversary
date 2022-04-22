@@ -78,7 +78,13 @@ npm run test
 ### End to end testing
 
 You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute. The date string should be in 'yyyy-MM-dd' format. Setting `sendNow` to true, will send messages
-immediately.
+immediately. An example of test event:
+```json
+{
+  "dateString": "2022-04-25",
+  "sendNow": true
+}
+```
 
 
 (Optional) Modify the interval of notifications
