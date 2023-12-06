@@ -13,8 +13,12 @@ class SlackService {
    * Post a scheduled message.
    * https://api.slack.com/methods/chat.scheduleMessage
    */
-  public scheduleMessage(message: string, contextMessages: string[], profileImageUrl: string | undefined, date: Date) {
-    
+  public scheduleMessage(
+    message: string,
+    contextMessages: string[],
+    profileImageUrl: string | undefined,
+    date: Date
+  ) {
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve(message);
     }
@@ -23,76 +27,107 @@ class SlackService {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: message + '\n\n' + contextMessages.join('\n')
-      }
+        text: message + "\n\n" + contextMessages.join("\n"),
+      },
     };
     // TODO need to check if image exists at this point?
     if (profileImageUrl) {
-      section['accessory'] = {
-        "type": "image",
-        "image_url": profileImageUrl,
+      section["accessory"] = {
+        type: "image",
+        image_url: profileImageUrl,
         // TODO remove alt?
-        "alt_text": "images"
-      }
+        alt_text: "images",
+      };
     }
     const messageBody: any = {
       channel: this.slackConfiguration.channelId,
       // unix timestamp
       post_at: Math.ceil(date.getTime() / 1000),
       text: message,
-      blocks: [section]
+      blocks: [section],
     };
 
-    console.info(`Sending scheduled message at ${date}: \n`, JSON.stringify(messageBody));
-    return axios.post(url, messageBody, {
-      headers: {
-        'Authorization': `Bearer ${this.slackConfiguration.appToken}`,
-        'Content-Type': 'application/json; charset=utf-8'
-    }
-    }).then((response) => {
-      if (!response.data.ok) {
-        console.error('Failed to post message', response.data);
-        throw Error(`Message sending failed: ${JSON.stringify(response.data)}`);
-      } else {
-        console.info("Message scheduled: ", response.status, response.statusText);
-        console.info("Response data: ", JSON.stringify(response.data, null, 2));
-      }
-    });
+    console.info(
+      `Sending scheduled message at ${date}: \n`,
+      JSON.stringify(messageBody)
+    );
+    return axios
+      .post(url, messageBody, {
+        headers: {
+          Authorization: `Bearer ${this.slackConfiguration.appToken}`,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      })
+      .then((response) => {
+        if (!response.data.ok) {
+          console.error("Failed to post message", response.data);
+          throw Error(
+            `Message sending failed: ${JSON.stringify(response.data)}`
+          );
+        } else {
+          console.info(
+            "Message scheduled: ",
+            response.status,
+            response.statusText
+          );
+          console.info(
+            "Response data: ",
+            JSON.stringify(response.data, null, 2)
+          );
+        }
+      });
   }
 
-  public async getChannelUsers(): Promise<ReadonlyArray<SlackUser>>{
+  public async getChannelUsers(): Promise<ReadonlyArray<SlackUser>> {
     const channelUsersIds = await this.getChannelUsersIds();
     console.log("Channel user ids " + channelUsersIds);
-    const channelUsers = await this.getUsers()
+    const channelUsers = await this.getUsers();
     console.log("All users " + JSON.stringify(channelUsers));
-    const filteredUsers = channelUsers.filter(user => channelUsersIds.includes(user.id));
+    const filteredUsers = channelUsers.filter((user) =>
+      channelUsersIds.includes(user.id)
+    );
     console.log("Filtered users " + JSON.stringify(filteredUsers));
     return filteredUsers;
   }
+
+  private userCache: Promise<ReadonlyArray<SlackUser>> | null;
 
   /**
    * Fetch list of all users.
    * https://api.slack.com/methods/users.list
    */
   public getUsers(): Promise<ReadonlyArray<SlackUser>> {
-    const url = "https://slack.com/api/users.list"
+    const url = "https://slack.com/api/users.list";
     if (this.slackConfiguration.dryRun) {
       return Promise.resolve([]);
     } else {
-      return axios.get(url, {
-        headers: {'Authorization': `Bearer ${this.slackConfiguration.appToken}`}
-      })
+      if (this.userCache != null) {
+        return this.userCache;
+      }
+      return axios
+        .get(url, {
+          headers: {
+            Authorization: `Bearer ${this.slackConfiguration.appToken}`,
+          },
+        })
         .then((response) => {
           // TODO missing paging with cursors
-          return response.data.members
-           .map((member: any) => new SlackUser(member.id, member.profile.real_name, member.profile.email))
+          this.userCache = response.data.members.map(
+            (member: any) =>
+              new SlackUser(
+                member.id,
+                member.profile.real_name,
+                member.profile.email
+              )
+          );
+          return this.userCache as Promise<ReadonlyArray<SlackUser>>;
         });
     }
   }
 
   // https://api.slack.com/methods/channels.info
   // channels.info is deprecated, replaced by conversations.info or conversations.members
-  private getChannelUsersIds(): Promise<ReadonlyArray<string>>{
+  private getChannelUsersIds(): Promise<ReadonlyArray<string>> {
     return Promise.resolve([]);
   }
 }
