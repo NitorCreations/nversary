@@ -1,4 +1,5 @@
 # nversary  - work anniversary notifier
+
 nversary congratulates people on their work anniversary in Slack
 
 ## Functionality
@@ -7,17 +8,20 @@ Anniversary messages are sent on working days only and only currently only 3 mes
 on the same day, they are spread out so that people that have worked longer, get get the message closer to correct day.
 
 ## Instructions
+
 How to set up and configure nversary
 
 ### Build
+
 To build the project run 'serverless package' in the project directory
 
 ### AWS Account
-An AWS Account is required. If you don't have one, create it at https://aws.amazon.com/
+
+An AWS Account is required. If you don't have one, create it at <https://aws.amazon.com/>
 
 ### Slack
 
-- Go to https://api.slack.com/apps and click Create New App, give your app a name and attach it to a workspace
+- Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace
 - In Basic Configuration, from Add features and functionality, choose 'Incoming Webhooks' and turn the feature on from the switch
   - Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
   - Copy the webhook url for later use
@@ -27,6 +31,7 @@ An AWS Account is required. If you don't have one, create it at https://aws.amaz
 - Invite bot to channel: `/invite @botname`
 
 The JSON in SSM Parameter Store looks similar to this:
+
 ```json
 {
   "slack": {
@@ -36,17 +41,19 @@ The JSON in SSM Parameter Store looks similar to this:
   }
 }
 ```
+
 - `webhookUrl` is *Webhook URL* from *Features/Incoming Webhooks*.
 - `appToken` is *Bot User OAuth Token* from *Features/OAuth & Permissions*.
-- `channelId` is the identifier for channel where messages are sent. You can obtain this from Slack UI/Chat app. 
-
+- `channelId` is the identifier for channel where messages are sent. You can obtain this from Slack UI/Chat app.
 
 ### Serverless framework
-nversary uses serverless framework to deploy nversary
-- Install serverless framework: https://serverless.com/framework/docs/getting-started/
 
+nversary uses serverless framework to deploy nversary
+
+- Install serverless framework: <https://serverless.com/framework/docs/getting-started/>
 
 ### Deploy to AWS
+
 nversary in configured with environment variables and SSM parameters.
 
 - `PEOPLE_S3_BUCKET` defines the S3 bucket within the same AWS account where people.json is stored.
@@ -54,7 +61,8 @@ nversary in configured with environment variables and SSM parameters.
 - `SSM_PARAMETER_NAME` defines SSM parameter name where Slack configuration is stored.
 
 Deploying to dev
-```
+
+```shell
 export PEOPLE_S3_BUCKET=my-bucket
 export PEOPLE_S3_KEY=some/path/people.json
 export SSM_PARAMETER_NAME=/nversary/config
@@ -62,7 +70,8 @@ sls deploy
 ```
 
 Deploying to prod
-```
+
+```shell
 export PEOPLE_S3_BUCKET=my-bucket
 export PEOPLE_S3_KEY=some/path/people.json
 export SSM_PARAMETER_NAME=/nversary/config-prod
@@ -71,14 +80,16 @@ sls deploy --stage prod
 
 ### Unit testing
 
-```
+```shell
 npm run test
 ```
 
 ### End to end testing
 
-You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute. The date string should be in 'yyyy-MM-dd' format. Setting `sendNow` to true, will send messages
-immediately. An example of test event:
+You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute.
+The date string should be in 'yyyy-MM-dd' format.
+Setting `sendNow` to true, will send messages immediately. An example of test event:
+
 ```json
 {
   "dateString": "2022-04-25",
@@ -86,9 +97,10 @@ immediately. An example of test event:
 }
 ```
 
-
 (Optional) Modify the interval of notifications
-* serverless.yml contains the cron expression which defines when the code is executed
 
-# TODO
+- serverless.yml contains the cron expression which defines when the code is executed
+
+## TODO
+
 - incoming webhook is not needed? Sending happens via scheduleMessage method.
