@@ -13,7 +13,7 @@ How to set up and configure nversary
 
 ### Build
 
-To build the project run 'serverless package' in the project directory
+To build the project run `serverless package` in the project directory
 
 ### AWS Account
 
