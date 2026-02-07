@@ -16,6 +16,13 @@ const slackService = new SlackService(new SlackConfiguration("", "", "", true));
 
 const service = new CongratulationService(anniversaryService, slackService);
 
+jest.spyOn(global, "setTimeout").mockImplementation((fn: any) => {
+    if (typeof fn === "function") {
+        fn();
+    }
+    return 0 as any;
+});
+
 it("Sends message without tag", async () => {
     const now = new Date("2020-02-06T03:30:00Z");
     //slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
