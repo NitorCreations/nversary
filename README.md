@@ -14,6 +14,11 @@ How to set up and configure nversary
 
 Build and package the Lambda artifact as a local zip file for Terraform to deploy.
 
+The artifact is created by Task at:
+
+- `build/dev/nversary.zip`
+- `build/prod/nversary.zip`
+
 ### AWS Account
 
 An AWS Account is required. If you don't have one, create it at <https://aws.amazon.com/>
@@ -52,11 +57,16 @@ nversary uses Terraform for deployment.
 Terraform layout:
 
 - `terraform/modules/nversary_notifier` reusable module
+- `terraform/infra/envs/dev` development environment root
 - `terraform/infra/envs/prod` production environment root
+- `terraform/remote-state` bootstrap for Terraform backend state bucket
 
-The production environment uses an S3 backend (`backend "s3" {}`) configured in `terraform/infra/envs/prod/backend.tf`.
+Both environments use an S3 backend (`backend "s3" {}`) configured in:
 
-Deployment values come from Terraform input variables and static values in `terraform/infra/envs/prod/main.tf`:
+- `terraform/infra/envs/dev/backend.tf`
+- `terraform/infra/envs/prod/backend.tf`
+
+Deployment values come from Terraform input variables and static values in `terraform/infra/envs/*/main.tf`:
 
 - `name` and `environment`
 - `runtime` and `timeout`
@@ -65,20 +75,44 @@ Deployment values come from Terraform input variables and static values in `terr
 - `artifact_file` (local path to the Lambda zip)
 - `log_retention_days`
 
-Deploying to prod:
+### Deployment prerequisites
+
+Install:
+
+- [Task](https://taskfile.dev/)
+- Terraform (`>= 1.14.0`)
+- Node.js + npm
+
+Set required environment variables:
 
 ```shell
-cd terraform/infra/envs/prod
-terraform init
-terraform plan \
-  -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
-  -var="people_s3_key=$PEOPLE_S3_KEY" \
-  -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
-terraform apply \
-  -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
-  -var="people_s3_key=$PEOPLE_S3_KEY" \
-  -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
+export PEOPLE_S3_BUCKET=your-people-bucket
+export PEOPLE_S3_KEY=path/to/people.json
+export SSM_PARAMETER_NAME=/path/to/slack-config
 ```
+
+### Deploy with Task
+
+Plan/apply for development:
+
+```shell
+task deploy:plan:dev
+task deploy:dev
+```
+
+Plan/apply for production:
+
+```shell
+task deploy:plan:prod
+task deploy:prod
+```
+
+Task workflow does all of the following:
+
+- validates required environment variables
+- bootstraps Terraform remote state from `terraform/remote-state/main.tf` if needed
+- packages Lambda artifact zip for the selected environment
+- runs Terraform `init`, `plan`, and `apply` in the matching environment root
 
 ### Unit testing
 

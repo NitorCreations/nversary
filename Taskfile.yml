@@ -1,0 +1,123 @@
+version: '3'
+
+env:
+  TF_IN_AUTOMATION: 'true'
+
+vars:
+  ENV: '{{default "dev" .ENV}}'
+  TF_ENV_DIR: 'terraform/infra/envs/{{.ENV}}'
+  BUILD_DIR: 'build/{{.ENV}}'
+  LAMBDA_BUILD_DIR: '.task/lambda/{{.ENV}}'
+  ARTIFACT_FILE: '{{.BUILD_DIR}}/nversary.zip'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  check-env:
+    desc: Validate required deployment environment variables
+    silent: true
+    cmds:
+      - |
+        missing=""
+        for var in PEOPLE_S3_BUCKET PEOPLE_S3_KEY SSM_PARAMETER_NAME; do
+          eval "value=\${$var}"
+          if [ -z "$value" ]; then
+            missing="$missing $var"
+          fi
+        done
+
+        if [ -n "$missing" ]; then
+          echo "Deployment configuration error: missing required environment variable(s):$missing" >&2
+          echo "" >&2
+          echo "Set them before running deploy/plan. Example:" >&2
+          echo "  PEOPLE_S3_BUCKET=my-bucket PEOPLE_S3_KEY=path/to/people.json SSM_PARAMETER_NAME=/app/slack task deploy:plan:dev" >&2
+          exit 1
+        fi
+
+  bootstrap-state:
+    desc: Bootstrap Terraform remote state bucket from terraform/remote-state/main.tf
+    dir: terraform/remote-state
+    cmds:
+      - terraform init
+      - |
+        terraform state show aws_s3_bucket.terraform_state >/dev/null 2>&1 || {
+          terraform import aws_s3_bucket.terraform_state nversary-terraform-state >/dev/null 2>&1 || true
+        }
+      - terraform apply -auto-approve
+
+  package:
+    desc: Build Lambda artifact at build/{{.ENV}}/nversary.zip
+    cmds:
+      - mkdir -p {{.BUILD_DIR}}
+      - rm -rf {{.LAMBDA_BUILD_DIR}}
+      - mkdir -p {{.LAMBDA_BUILD_DIR}}
+      - cp package.json package-lock.json {{.LAMBDA_BUILD_DIR}}/
+      - npm ci --omit=dev --prefix {{.LAMBDA_BUILD_DIR}}
+      - |
+        npx tsc -p tsconfig.build.json --outDir {{.LAMBDA_BUILD_DIR}}
+      - rm -f {{.ARTIFACT_FILE}}
+      - |
+        (
+          cd {{.LAMBDA_BUILD_DIR}}
+          zip -qr ../../../{{.ARTIFACT_FILE}} .
+        )
+
+  tf:init:
+    desc: Initialize Terraform in terraform/infra/envs/{{.ENV}}
+    deps: [bootstrap-state]
+    dir: '{{.TF_ENV_DIR}}'
+    cmds:
+      - terraform init
+
+  tf:plan:
+    desc: Terraform plan for ENV={{.ENV}}
+    deps: [check-env, package, tf:init]
+    dir: '{{.TF_ENV_DIR}}'
+    cmds:
+      - |
+        terraform plan \
+          -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
+          -var="people_s3_key=$PEOPLE_S3_KEY" \
+          -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
+
+  tf:apply:
+    desc: Terraform apply for ENV={{.ENV}}
+    deps: [check-env, package, tf:init]
+    dir: '{{.TF_ENV_DIR}}'
+    cmds:
+      - |
+        terraform apply -auto-approve \
+          -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
+          -var="people_s3_key=$PEOPLE_S3_KEY" \
+          -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
+
+  deploy:dev:
+    desc: Deploy nversary to dev (bootstraps remote state automatically)
+    cmds:
+      - task: tf:apply
+        vars:
+          ENV: dev
+
+  deploy:prod:
+    desc: Deploy nversary to prod (bootstraps remote state automatically)
+    cmds:
+      - task: tf:apply
+        vars:
+          ENV: prod
+
+  deploy:plan:dev:
+    desc: Plan nversary deployment for dev (bootstraps remote state automatically)
+    cmds:
+      - task: tf:plan
+        vars:
+          ENV: dev
+
+  deploy:plan:prod:
+    desc: Plan nversary deployment for prod (bootstraps remote state automatically)
+    cmds:
+      - task: tf:plan
+        vars:
+          ENV: prod

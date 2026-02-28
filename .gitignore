@@ -2,6 +2,10 @@
 node_modules
 jspm_packages
 
+# Task build directory
+build/
+.task/
+
 # Serverless directories
 .serverless
 
