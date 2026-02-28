@@ -2,7 +2,7 @@ module "nversary_notifier" {
   source = "../../../modules/nversary_notifier"
 
   environment = "dev"
-  runtime     = "nodejs20.x"
+  runtime     = "nodejs24.x"
   timeout     = 300
 
   people_s3_bucket   = var.people_s3_bucket
