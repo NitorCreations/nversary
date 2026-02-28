@@ -120,7 +120,7 @@ resource "aws_lambda_function" "nversary_notifier" {
 resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${local.name}-schedule-${var.environment}"
   description         = "Schedule for ${local.name} (${var.environment}) Lambda function"
-  schedule_expression = "cron(50 3 * * ? *)"
+  schedule_expression = var.schedule_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {

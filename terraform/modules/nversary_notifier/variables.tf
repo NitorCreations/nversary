@@ -40,3 +40,8 @@ variable "environment" {
   description = "Environment name"
   type        = string
 }
+
+variable "schedule_expression" {
+  description = "Schedule expression for Lambda invocation (e.g. cron or rate expression)"
+  type        = string
+}

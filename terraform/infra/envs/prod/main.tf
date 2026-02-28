@@ -9,6 +9,6 @@ module "nversary_notifier" {
   people_s3_key      = var.people_s3_key
   ssm_parameter_name = var.ssm_parameter_name
   artifact_file      = "${path.module}/../../../../build/prod/nversary.zip"
-
+  schedule_expression = "cron(50 3 * * ? *)"
   log_retention_days = 30
 }
