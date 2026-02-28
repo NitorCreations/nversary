@@ -2,10 +2,24 @@
 node_modules
 jspm_packages
 
-# Serverless directories
-.serverless
+# Task build directory
+build/
+.task/
 
 # Jest coverage
 /coverage
 
 tmp/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

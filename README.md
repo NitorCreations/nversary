@@ -1,11 +1,10 @@
-# nversary  - work anniversary notifier
+# nversary - work anniversary notifier
 
-nversary congratulates people on their work anniversary in Slack
+nversary congratulates people on their work anniversary in Slack.
 
 ## Functionality
 
-Anniversary messages are sent on working days only and only currently only 3 messages per day. If there are more than two anniversaries
-on the same day, they are spread out so that people that have worked longer, get get the message closer to correct day.
+Anniversary messages are sent on working days only, with a maximum of 3 messages per day. If there are more than 3 anniversaries on nearby dates, they are spread out so that people with longer tenure get the message closest to their actual anniversary day.
 
 ## Instructions
 
@@ -13,7 +12,12 @@ How to set up and configure nversary
 
 ### Build
 
-To build the project run 'serverless package' in the project directory
+Build and package the Lambda artifact as a local zip file for Terraform to deploy.
+
+The artifact is created by Task at:
+
+- `build/dev/nversary.zip`
+- `build/prod/nversary.zip`
 
 ### AWS Account
 
@@ -21,62 +25,94 @@ An AWS Account is required. If you don't have one, create it at <https://aws.ama
 
 ### Slack
 
-- Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace
-- In Basic Configuration, from Add features and functionality, choose 'Incoming Webhooks' and turn the feature on from the switch
-  - Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
-  - Copy the webhook url for later use
-- In OAuth & Permissions, add three scopes: `chat:write`, `users:read`, `users:read.email` and `channels:read`
-  - Save the Bot User OAuth Token
-- Store credentials to AWS SSM Parameter Store, as SecureString
-- Invite bot to channel: `/invite @botname`
+- Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace.
+- In OAuth & Permissions, add bot token scopes:
+    - `chat:write`
+    - `users:read`
+    - `users:read.email`
+- Install the app to the workspace and save the Bot User OAuth Token.
+- Invite bot to the target channel: `/invite @botname`
+- Store credentials to AWS SSM Parameter Store as `SecureString`.
 
 The JSON in SSM Parameter Store looks similar to this:
 
 ```json
 {
-  "slack": {
-    "webhookUrl": "https://hooks.slack.com/services/K2XSOISE/BJV2AO25W6X/lkfKssiXivpo0KawovOs",
-    "appToken": "xoxb-32896343824-849329924324243-lkjrewrwXKhgkDkfobo4dore",
-    "channelId": "JO3KFSO5"
-  }
+    "slack": {
+        "webhookUrl": "",
+        "appToken": "xoxb-32896343824-849329924324243-lkjrewrwXKhgkDkfobo4dore",
+        "channelId": "JO3KFSO5"
+    }
 }
 ```
 
-- `webhookUrl` is *Webhook URL* from *Features/Incoming Webhooks*.
-- `appToken` is *Bot User OAuth Token* from *Features/OAuth & Permissions*.
+- `webhookUrl` is currently unused by the runtime (kept for backward compatibility with the existing config model).
+- `appToken` is _Bot User OAuth Token_ from _Features/OAuth & Permissions_.
 - `channelId` is the identifier for channel where messages are sent. You can obtain this from Slack UI/Chat app.
-
-### Serverless framework
-
-nversary uses serverless framework to deploy nversary
-
-- Install serverless framework: <https://serverless.com/framework/docs/getting-started/>
 
 ### Deploy to AWS
 
-nversary in configured with environment variables and SSM parameters.
+nversary uses Terraform for deployment.
 
-- `PEOPLE_S3_BUCKET` defines the S3 bucket within the same AWS account where people.json is stored.
-- `PEOPLE_S3_KEY` defines the key for people.json inside the S3 bucket.
-- `SSM_PARAMETER_NAME` defines SSM parameter name where Slack configuration is stored.
+Terraform layout:
 
-Deploying to dev
+- `terraform/modules/nversary_notifier` reusable module
+- `terraform/infra/envs/dev` development environment root
+- `terraform/infra/envs/prod` production environment root
+- `terraform/remote-state` bootstrap for Terraform backend state bucket
+
+Both environments use an S3 backend (`backend "s3" {}`) configured in:
+
+- `terraform/infra/envs/dev/backend.tf`
+- `terraform/infra/envs/prod/backend.tf`
+
+Deployment values come from Terraform input variables and static values in `terraform/infra/envs/*/main.tf`:
+
+- `name` and `environment`
+- `runtime` and `timeout`
+- `people_s3_bucket` and `people_s3_key` (pass at apply/plan time)
+- `ssm_parameter_name` (pass at apply/plan time)
+- `artifact_file` (local path to the Lambda zip)
+- `log_retention_days`
+
+### Deployment prerequisites
+
+Install:
+
+- [Task](https://taskfile.dev/)
+- Terraform (`>= 1.14.0`)
+- Node.js + npm
+
+Set required environment variables:
 
 ```shell
-export PEOPLE_S3_BUCKET=my-bucket
-export PEOPLE_S3_KEY=some/path/people.json
-export SSM_PARAMETER_NAME=/nversary/config
-sls deploy
+export PEOPLE_S3_BUCKET=your-people-bucket
+export PEOPLE_S3_KEY=path/to/people.json
+export SSM_PARAMETER_NAME=/path/to/slack-config
 ```
 
-Deploying to prod
+### Deploy with Task
+
+Plan/apply for development:
 
 ```shell
-export PEOPLE_S3_BUCKET=my-bucket
-export PEOPLE_S3_KEY=some/path/people.json
-export SSM_PARAMETER_NAME=/nversary/config-prod
-sls deploy --stage prod
+task deploy:plan:dev
+task deploy:dev
 ```
+
+Plan/apply for production:
+
+```shell
+task deploy:plan:prod
+task deploy:prod
+```
+
+Task workflow does all of the following:
+
+- validates required environment variables
+- bootstraps Terraform remote state from `terraform/remote-state/main.tf` if needed
+- packages Lambda artifact zip for the selected environment
+- runs Terraform `init`, `plan`, and `apply` in the matching environment root
 
 ### Unit testing
 
@@ -92,15 +128,7 @@ Setting `sendNow` to true, will send messages immediately. An example of test ev
 
 ```json
 {
-  "dateString": "2022-04-25",
-  "sendNow": true
+    "dateString": "2022-04-25",
+    "sendNow": true
 }
 ```
-
-(Optional) Modify the interval of notifications
-
-- serverless.yml contains the cron expression which defines when the code is executed
-
-## TODO
-
-- incoming webhook is not needed? Sending happens via scheduleMessage method.
