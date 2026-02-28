@@ -1,72 +1,152 @@
 # Architecture Overview
 
 ## What this project is
-`nversary` is an AWS Lambda based Slack notifier that congratulates employees on their work anniversaries. It runs on a daily schedule, loads employee and Slack configuration data from AWS services, calculates who should be congratulated on that day, and schedules Slack messages.
 
-## High-level runtime architecture
+`nversary` is an AWS Lambda application that sends work-anniversary congratulations to a Slack channel.
 
-1. **Trigger layer**
-- AWS EventBridge/CloudWatch schedule invokes Lambda function `handler.greeter` once per day (configured in `serverless.yml`).
+At runtime it:
 
-2. **Ingress/config layer**
-- Employee data is loaded from S3 (`PEOPLE_S3_BUCKET` + `PEOPLE_S3_KEY`).
-- Slack credentials/channel config is loaded from SSM Parameter Store (`SSM_PARAMETER_NAME`).
+- loads people data from S3
+- loads Slack config from SSM Parameter Store
+- calculates who should be congratulated on the current day
+- schedules Slack messages via Slack Web API
 
-3. **Domain/repository layer**
-- `EmployeeRepositoryLocalImpl` maps raw JSON into domain entities (`Employee`, `Presence`).
+## Runtime architecture
 
-4. **Application services layer**
-- `AnniversaryService` computes which employees should be congratulated on each workday.
-- `CongratulationService` builds message content, resolves Slack user tags by email, and determines exact send times for each message.
+1. Trigger
 
-5. **Integration layer**
-- `SlackService` calls Slack Web API:
-  - `users.list` for user lookup
-  - `chat.scheduleMessage` for posting scheduled messages
+- EventBridge rule invokes Lambda once per day using `cron(50 3 * * ? *)` (03:50 UTC).
+
+2. Lambda entrypoint
+
+- Handler: `handler.greeter`
+- Reads deployment-time env vars:
+    - `PEOPLE_S3_BUCKET`
+    - `PEOPLE_S3_KEY`
+    - `SSM_PARAMETER_NAME`
+
+3. Data/config ingress
+
+- People JSON is fetched from S3 object `s3://$PEOPLE_S3_BUCKET/$PEOPLE_S3_KEY`.
+- Slack configuration is fetched from SSM `SecureString` parameter `$SSM_PARAMETER_NAME`.
+
+4. Domain/repository/services
+
+- `EmployeeRepositoryLocalImpl` maps JSON to `Employee` and `Presence`.
+- `AnniversaryService` computes monthly congratulation-day assignments.
+- `CongratulationService` resolves mentions, formats messages, and chooses send times.
+- `SlackService` calls Slack APIs.
+
+5. External integration
+
+- Slack `users.list` for mapping email -> Slack user id
+- Slack `chat.scheduleMessage` for scheduled post delivery
 
 ## Main execution flow
 
-1. Lambda handler receives a scheduled event (or test event with optional `dateString` and `sendNow`).
-2. Handler fetches people JSON from S3.
-3. Handler fetches Slack config JSON from SSM (decrypted SecureString).
-4. Handler constructs services (`AnniversaryService` + `CongratulationService` + `SlackService`).
-5. `CongratulationService.congratulate(...)`:
-- Computes today’s congratulation candidates (`maxPerDay = 3`).
-- If no candidates, exits.
-- For each employee selected for today:
-  - Looks up Slack user mention by email.
-  - Builds message + context.
-  - Schedules message for one of three fixed UTC times.
+1. Lambda receives EventBridge event (or test event with `dateString` and `sendNow`).
+2. Handler selects target date:
 
-## Anniversary scheduling logic
+- `new Date(event.dateString)` when provided
+- otherwise current date
 
-- Only weekdays (Mon-Fri) are considered congratulation days.
-- Employees with anniversaries in the current month are candidates.
-- First-year anniversaries are excluded (start year must be different from current year).
-- Candidates are sorted by oldest start year first (longer tenure gets priority).
-- Candidates are assigned to the closest available workday to their original anniversary date.
-- Daily cap is `3` messages (bound to the three configured send times).
+3. Handler fetches people from S3 and config from SSM.
+4. Handler constructs:
 
-## Deployment/infrastructure
+- `AnniversaryService(new EmployeeRepositoryLocalImpl(peopleData))`
+- `SlackService(slackConfig)`
+- `CongratulationService(anniversaryService, slackService)`
 
-- Serverless Framework deploys one Lambda (`nversaryGreeter`) to AWS.
-- IAM allows:
-  - `ssm:GetParameter` on configured SSM path
-  - `s3:GetObject` on configured people JSON object
-- Runtime: Node.js (`serverless.yml` currently uses `nodejs14.x`).
+5. `CongratulationService.congratulate(date, sendNow)`:
 
-## Code structure
+- Builds 3 daily send slots (UTC): `11:40`, `07:50`, `09:45`
+- Uses `maxPerDay = 3`
+- Asks `AnniversaryService` for people assigned to this date
+- For each selected employee:
+    - fetches mention tag from Slack users by email
+    - builds message/context text
+    - schedules Slack message (or near-immediate schedule when `sendNow=true`)
 
-- `handler.ts`: Lambda entry point and wiring
-- `service/`: business logic and Slack API integration
-- `repository/`: employee data access/mapping
-- `domain/`: core entities and event/config types
-- `test/` + `*.test.ts`: unit tests for scheduling, formatting, and repository mapping
+## Anniversary scheduling rules
 
-## Key constraints and current technical debt
+- Only weekdays are valid congratulation days (`Mon-Fri`).
+- Only employees whose start month equals current month are candidates.
+- First-year anniversaries are excluded (`start year !== current year`).
+- Candidates are sorted by start year ascending (longer tenure first).
+- Each employee is assigned to the closest available workday to their anniversary date.
+- Each day has at most `maxPerDay` slots (currently `3`).
 
-- Slack user lookup currently fetches full user list (no pagination support yet).
-- Holiday/vacation calendar is not modeled; only weekend filtering exists.
-- Notification send times are hardcoded in code.
-- Lambda runtime in config is old (`nodejs14.x`) and likely should be upgraded.
-- `webhookUrl` is present in config model but message sending currently uses bot token + Slack Web API.
+## Message composition
+
+- Base message:
+    - `Congratulations *<fullName>* <optionalTag><years> year(s) at Nitor! :tada:`
+- Context line includes start date, position, and subcompany.
+- Milestone extras:
+    - `>= 5 years`: one palm tree
+    - `>= 10 years`: two palm trees
+    - extra achievement lines at exactly 5 and 10 years
+- If employee has `profileImageUrl`, it is sent as a Slack block accessory image.
+
+## Deployment architecture (current)
+
+Deployment is Terraform-based (not Serverless Framework).
+
+- Reusable module: `terraform/modules/nversary_notifier`
+- Environment roots:
+    - `terraform/infra/envs/dev`
+    - `terraform/infra/envs/prod`
+- Region: `eu-west-1`
+- Lambda runtime: `nodejs20.x`
+- Lambda timeout: `300s`
+
+Module provisions:
+
+- IAM role + inline policy
+    - `ssm:GetParameter` for configured parameter
+    - `s3:GetObject` for configured people object
+    - CloudWatch Logs permissions
+- CloudWatch log group
+- Lambda function
+- EventBridge rule + target
+- Lambda permission for EventBridge invocation
+
+Terraform state:
+
+- S3 backend bucket: `nversary-terraform-state`
+- Bootstrapped from `terraform/remote-state`
+
+## Build and packaging flow
+
+`Taskfile.yml` is the deployment entrypoint:
+
+- validates required env vars
+- bootstraps Terraform remote state
+- packages Lambda zip per env:
+    - `build/dev/nversary.zip`
+    - `build/prod/nversary.zip`
+- runs `terraform init`, `plan`, and `apply`
+
+Package build compiles TypeScript from:
+
+- `handler.ts`
+- `domain/**/*.ts`
+- `repository/**/*.ts`
+- `service/**/*.ts`
+
+## Code layout
+
+- `handler.ts`: Lambda orchestration and AWS fetches
+- `domain/`: domain models and event/config types
+- `repository/`: employee data mapping
+- `service/`: anniversary logic, message formatting, Slack API client
+- `terraform/`: infra module + env roots + remote-state bootstrap
+- `test/` and `*.test.ts`: unit tests for scheduling, formatting, and repository behavior
+
+## Known limitations / technical debt
+
+- Slack user lookup uses `users.list` without cursor pagination.
+- Mention resolution still loads full workspace user list (cached per invocation).
+- Holiday/vacation calendars are not modeled; only weekends are skipped.
+- Daily send times are hardcoded in `CongratulationService`.
+- Slack config still includes `webhookUrl`, but runtime uses bot token + Web API methods.
+- Several rate-limit mitigations are fixed sleeps (`setTimeout(1500)`), not adaptive backoff.
