@@ -6,9 +6,6 @@ jspm_packages
 build/
 .task/
 
-# Serverless directories
-.serverless
-
 # Jest coverage
 /coverage
 
