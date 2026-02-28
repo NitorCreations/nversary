@@ -84,11 +84,11 @@ resource "aws_iam_role_policy" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "${var.name}-logs-${var.environment}"
+  name              = "/aws/lambda/${var.name}-lambda-${var.environment}"
   retention_in_days = var.log_retention_days
 }
 
-resource "aws_lambda_function" "nversary-notifier" {
+resource "aws_lambda_function" "nversary_notifier" {
   function_name = "${var.name}-lambda-${var.environment}"
   description   = "Sends work anniversary greetings to Slack channel. Runs daily"
   role          = aws_iam_role.lambda.arn
@@ -97,6 +97,7 @@ resource "aws_lambda_function" "nversary-notifier" {
   timeout       = var.timeout
 
   filename = var.artifact_file
+  source_code_hash = filebase64sha256(var.artifact_file)
 
   environment {
     variables = {
@@ -114,20 +115,20 @@ resource "aws_lambda_function" "nversary-notifier" {
 
 resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${var.name}-schedule-${var.environment}"
-  description         = "Schedule for ${var.name}"
+  description         = "Schedule for ${var.name} (${var.environment}) Lambda function"
   schedule_expression = "cron(50 3 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {
   rule      = aws_cloudwatch_event_rule.schedule.name
   target_id = "${var.name}-target"
-  arn       = aws_lambda_function.nversary-notifier.arn
+  arn       = aws_lambda_function.nversary_notifier.arn
 }
 
 resource "aws_lambda_permission" "allow_eventbridge_to_invoke_nversary_notifier" {
   statement_id  = "AllowExecutionFromEventBridge"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.nversary-notifier.function_name
+  function_name = aws_lambda_function.nversary_notifier.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.schedule.arn
 }
