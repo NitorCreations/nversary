@@ -88,7 +88,7 @@ resource "aws_iam_role_policy" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${local.name}-lambda-${var.environment}"
+  name              = "/aws/lambda/${aws_lambda_function.nversary_notifier.function_name}"
   retention_in_days = var.log_retention_days
 }
 
