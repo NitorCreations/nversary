@@ -10,7 +10,10 @@ terraform {
 }
 
 locals {
-  name = "nversary-greeter"
+  name           = "nversary-greeter"
+  function_name  = "${local.name}-lambda-${var.environment}"
+  log_group_name = "/aws/lambda/${local.function_name}"
+  log_group_arn  = "arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:${local.log_group_name}"
 }
 
 data "aws_caller_identity" "current" {}
@@ -71,7 +74,7 @@ data "aws_iam_policy_document" "lambda_policy" {
     ]
 
     resources = [
-      "${aws_cloudwatch_log_group.lambda.arn}:*"
+      "${local.log_group_arn}:*"
     ]
   }
 }
@@ -88,12 +91,12 @@ resource "aws_iam_role_policy" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${aws_lambda_function.nversary_notifier.function_name}"
+  name              = local.log_group_name
   retention_in_days = var.log_retention_days
 }
 
 resource "aws_lambda_function" "nversary_notifier" {
-  function_name = "${local.name}-lambda-${var.environment}"
+  function_name = local.function_name
   description   = "Sends work anniversary greetings to Slack channel. Runs daily"
   role          = aws_iam_role.lambda.arn
   runtime       = var.runtime
