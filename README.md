@@ -1,11 +1,10 @@
-# nversary  - work anniversary notifier
+# nversary - work anniversary notifier
 
-nversary congratulates people on their work anniversary in Slack
+nversary congratulates people on their work anniversary in Slack.
 
 ## Functionality
 
-Anniversary messages are sent on working days only and only currently only 3 messages per day. If there are more than two anniversaries
-on the same day, they are spread out so that people that have worked longer, get get the message closer to correct day.
+Anniversary messages are sent on working days only, with a maximum of 3 messages per day. If there are more than 3 anniversaries on nearby dates, they are spread out so that people with longer tenure get the message closest to their actual anniversary day.
 
 ## Instructions
 
@@ -13,7 +12,7 @@ How to set up and configure nversary
 
 ### Build
 
-To build the project run 'serverless package' in the project directory
+To build the project run `serverless package` in the project directory.
 
 ### AWS Account
 
@@ -21,40 +20,41 @@ An AWS Account is required. If you don't have one, create it at <https://aws.ama
 
 ### Slack
 
-- Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace
-- In Basic Configuration, from Add features and functionality, choose 'Incoming Webhooks' and turn the feature on from the switch
-  - Click 'Add new Webhook to Workspace' and choose the channel you will be posting to
-  - Copy the webhook url for later use
-- In OAuth & Permissions, add three scopes: `chat:write`, `users:read`, `users:read.email` and `channels:read`
-  - Save the Bot User OAuth Token
-- Store credentials to AWS SSM Parameter Store, as SecureString
-- Invite bot to channel: `/invite @botname`
+- Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace.
+- In OAuth & Permissions, add bot token scopes:
+  - `chat:write`
+  - `users:read`
+  - `users:read.email`
+- Install the app to the workspace and save the Bot User OAuth Token.
+- Invite bot to the target channel: `/invite @botname`
+- Store credentials to AWS SSM Parameter Store as `SecureString`.
 
 The JSON in SSM Parameter Store looks similar to this:
 
 ```json
 {
   "slack": {
-    "webhookUrl": "https://hooks.slack.com/services/K2XSOISE/BJV2AO25W6X/lkfKssiXivpo0KawovOs",
+    "webhookUrl": "",
     "appToken": "xoxb-32896343824-849329924324243-lkjrewrwXKhgkDkfobo4dore",
     "channelId": "JO3KFSO5"
   }
 }
 ```
 
-- `webhookUrl` is *Webhook URL* from *Features/Incoming Webhooks*.
+- `webhookUrl` is currently unused by the runtime (kept for backward compatibility with the existing config model).
 - `appToken` is *Bot User OAuth Token* from *Features/OAuth & Permissions*.
 - `channelId` is the identifier for channel where messages are sent. You can obtain this from Slack UI/Chat app.
 
 ### Serverless framework
 
-nversary uses serverless framework to deploy nversary
+nversary uses the Serverless Framework to deploy the Lambda function.
 
 - Install serverless framework: <https://serverless.com/framework/docs/getting-started/>
+- Current configuration in `serverless.yml` uses `nodejs14.x` runtime. Consider upgrading to a supported Node.js Lambda runtime before production use.
 
 ### Deploy to AWS
 
-nversary in configured with environment variables and SSM parameters.
+nversary is configured with environment variables and SSM parameters.
 
 - `PEOPLE_S3_BUCKET` defines the S3 bucket within the same AWS account where people.json is stored.
 - `PEOPLE_S3_KEY` defines the key for people.json inside the S3 bucket.
@@ -99,8 +99,4 @@ Setting `sendNow` to true, will send messages immediately. An example of test ev
 
 (Optional) Modify the interval of notifications
 
-- serverless.yml contains the cron expression which defines when the code is executed
-
-## TODO
-
-- incoming webhook is not needed? Sending happens via scheduleMessage method.
+- `serverless.yml` contains the cron expression which defines when the code is executed.
