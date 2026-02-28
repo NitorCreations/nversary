@@ -1,8 +1,3 @@
-variable "name" {
-  description = "Lambda function name"
-  type        = string
-}
-
 variable "runtime" {
   description = "Lambda runtime"
   type        = string

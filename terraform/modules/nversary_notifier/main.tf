@@ -9,6 +9,10 @@ terraform {
   }
 }
 
+locals {
+  name = "nversary-greeter"
+}
+
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
@@ -73,23 +77,23 @@ data "aws_iam_policy_document" "lambda_policy" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = "${var.name}-role-${var.environment}"
+  name               = "${local.name}-role-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
 resource "aws_iam_role_policy" "lambda" {
-  name   = "${var.name}-lambda-policy-${var.environment}"
+  name   = "${local.name}-lambda-policy-${var.environment}"
   role   = aws_iam_role.lambda.id
   policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${var.name}-lambda-${var.environment}"
+  name              = "/aws/lambda/${local.name}-lambda-${var.environment}"
   retention_in_days = var.log_retention_days
 }
 
 resource "aws_lambda_function" "nversary_notifier" {
-  function_name = "${var.name}-lambda-${var.environment}"
+  function_name = "${local.name}-lambda-${var.environment}"
   description   = "Sends work anniversary greetings to Slack channel. Runs daily"
   role          = aws_iam_role.lambda.arn
   runtime       = var.runtime
@@ -114,14 +118,14 @@ resource "aws_lambda_function" "nversary_notifier" {
 }
 
 resource "aws_cloudwatch_event_rule" "schedule" {
-  name                = "${var.name}-schedule-${var.environment}"
-  description         = "Schedule for ${var.name} (${var.environment}) Lambda function"
+  name                = "${local.name}-schedule-${var.environment}"
+  description         = "Schedule for ${local.name} (${var.environment}) Lambda function"
   schedule_expression = "cron(50 3 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {
   rule      = aws_cloudwatch_event_rule.schedule.name
-  target_id = "${var.name}-target"
+  target_id = "${local.name}-target-${var.environment}"
   arn       = aws_lambda_function.nversary_notifier.arn
 }
 

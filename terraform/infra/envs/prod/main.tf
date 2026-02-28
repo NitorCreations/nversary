@@ -1,7 +1,6 @@
 module "nversary_notifier" {
   source = "../../../modules/nversary_notifier"
 
-  name        = "nversary-greeter-prod"
   environment = "prod"
   runtime     = "nodejs20.x"
   timeout     = 300
