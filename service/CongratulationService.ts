@@ -101,7 +101,7 @@ class CongratulationService {
             contextMessages.push(
                 "Achievement Unlocked: Nitor Nestori! :palm_tree:",
             );
-        } else if (yearsAtCompany == 10) {
+        } else if (yearsAtCompany === 10) {
             contextMessages.push(
                 "Achievement Unlocked: Nitor Fellow! :palm_tree::palm_tree:",
             );
