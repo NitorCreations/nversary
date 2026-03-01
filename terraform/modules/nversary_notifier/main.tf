@@ -10,7 +10,10 @@ terraform {
 }
 
 locals {
-  name = "nversary-greeter"
+  name           = "nversary-greeter"
+  function_name  = "${local.name}-lambda-${var.environment}"
+  log_group_name = "/aws/lambda/${local.function_name}"
+  log_group_arn  = "arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:${local.log_group_name}"
 }
 
 data "aws_caller_identity" "current" {}
@@ -71,7 +74,7 @@ data "aws_iam_policy_document" "lambda_policy" {
     ]
 
     resources = [
-      "${aws_cloudwatch_log_group.lambda.arn}:*"
+      "${local.log_group_arn}:*"
     ]
   }
 }
@@ -88,12 +91,12 @@ resource "aws_iam_role_policy" "lambda" {
 }
 
 resource "aws_cloudwatch_log_group" "lambda" {
-  name              = "/aws/lambda/${aws_lambda_function.nversary_notifier.function_name}"
+  name              = local.log_group_name
   retention_in_days = var.log_retention_days
 }
 
 resource "aws_lambda_function" "nversary_notifier" {
-  function_name = "${local.name}-lambda-${var.environment}"
+  function_name = local.function_name
   description   = "Sends work anniversary greetings to Slack channel. Runs daily"
   role          = aws_iam_role.lambda.arn
   runtime       = var.runtime
@@ -108,6 +111,7 @@ resource "aws_lambda_function" "nversary_notifier" {
       PEOPLE_S3_BUCKET   = var.people_s3_bucket
       PEOPLE_S3_KEY      = var.people_s3_key
       SSM_PARAMETER_NAME = var.ssm_parameter_name
+      SLACK_DRY_RUN      = tostring(var.slack_dry_run)
     }
   }
 
@@ -120,7 +124,7 @@ resource "aws_lambda_function" "nversary_notifier" {
 resource "aws_cloudwatch_event_rule" "schedule" {
   name                = "${local.name}-schedule-${var.environment}"
   description         = "Schedule for ${local.name} (${var.environment}) Lambda function"
-  schedule_expression = "cron(50 3 * * ? *)"
+  schedule_expression = var.schedule_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda" {

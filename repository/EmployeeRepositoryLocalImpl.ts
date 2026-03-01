@@ -2,24 +2,49 @@ import { Employee } from "../domain/Employee";
 import { Presence } from "../domain/Presence";
 import { IEmployeeRepository } from "./EmployeeRepository";
 
+interface RawPresence {
+    start: string;
+}
+
+interface RawEmployee {
+    fullName: string;
+    email: string;
+    presence: RawPresence[];
+    position: string;
+    businessUnit: string;
+    profileImageUrl?: string;
+    slackId?: string;
+}
+
+interface PeopleData {
+    people: RawEmployee[];
+}
+
 class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
+    public data: PeopleData;
 
-  public data: any[];
+    constructor(data: PeopleData) {
+        this.data = data;
+    }
 
-  constructor(data: any[]) {
-    this.data = data;
-  }
-
-  public findAllEmployees(): ReadonlyArray<Employee> {
-    const people: any[] = (this.data as any).people;
-    return people.map((p) => new Employee(
-      p.fullName,
-      p.email,
-      p.presence.map((pres: any) => new Presence(new Date(pres.start))),
-      p.position,
-      p.subcompany,
-      p.profileImageUrl));
-  }
+    public findAllEmployees(): ReadonlyArray<Employee> {
+        const people = this.data.people;
+        return people.map(
+            (p) =>
+                new Employee(
+                    p.fullName,
+                    p.email,
+                    p.presence.map(
+                        (pres) => new Presence(new Date(pres.start)),
+                    ),
+                    p.position,
+                    p.businessUnit,
+                    p.profileImageUrl,
+                    p.slackId,
+                ),
+        );
+    }
 }
 
 export { EmployeeRepositoryLocalImpl };
+export type { PeopleData };

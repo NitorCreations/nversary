@@ -1,10 +1,10 @@
 import S3 from "aws-sdk/clients/s3";
 import SSM from "aws-sdk/clients/ssm";
-import { URL } from "url";
-import { Callback, Context, Handler, ScheduledEvent } from "aws-lambda";
+import { Context } from "aws-lambda";
 import { INversaryEvent } from "./domain/NversaryEvent";
 import { SlackConfiguration } from "./domain/SlackConfiguration";
 import { EmployeeRepositoryLocalImpl } from "./repository/EmployeeRepositoryLocalImpl";
+import type { PeopleData } from "./repository/EmployeeRepositoryLocalImpl";
 import { AnniversaryService } from "./service/AnniversaryService";
 import { CongratulationService } from "./service/CongratulationService";
 import { SlackService } from "./service/SlackService";
@@ -28,7 +28,7 @@ const fetchConfig = async (parameterName: string): Promise<Config> => {
                 config.slack.webhookUrl as string,
                 config.slack.channelId as string,
                 config.slack.appToken as string,
-                false,
+                process.env["SLACK_DRY_RUN"] === "true",
             ),
         }));
 };
@@ -36,7 +36,10 @@ const fetchConfig = async (parameterName: string): Promise<Config> => {
 /**
  * Fetch people data from S3 bucket as a JSON.
  */
-const fetchPeopleData = async (bucket: string, key: string): Promise<any> => {
+const fetchPeopleData = async (
+    bucket: string,
+    key: string,
+): Promise<PeopleData> => {
     console.info(`Fetch S3 object s3://${bucket}/${key}`);
     const s3 = new S3();
     return s3
@@ -45,11 +48,10 @@ const fetchPeopleData = async (bucket: string, key: string): Promise<any> => {
         .then((response: any) => JSON.parse(response.Body.toString("utf-8")));
 };
 
-export const greeter: Handler = async (
+export const greeter = async (
     event: INversaryEvent,
-    context: Context,
-    cb: Callback,
-) => {
+    _context: Context,
+): Promise<void> => {
     console.info("event: \n" + JSON.stringify(event, null, 2));
 
     const date = event.dateString ? new Date(event.dateString) : new Date();
