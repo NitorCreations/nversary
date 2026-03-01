@@ -13,6 +13,7 @@ interface RawEmployee {
     position: string;
     businessUnit: string;
     profileImageUrl?: string;
+    slackId?: string;
 }
 
 interface PeopleData {

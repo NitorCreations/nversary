@@ -7,6 +7,7 @@ class Employee {
     public position: string;
     public businessUnit: string;
     public profileImageUrl?: string;
+    public slackId?: string;
 
     constructor(
         fullName: string,
@@ -15,6 +16,7 @@ class Employee {
         position: string,
         businessUnit: string,
         profileImageUrl?: string,
+        slackId?: string,
     ) {
         this.fullName = fullName;
         this.email = email;
@@ -22,6 +24,7 @@ class Employee {
         this.position = position;
         this.businessUnit = businessUnit;
         this.profileImageUrl = profileImageUrl;
+        this.slackId = slackId;
     }
 }
 
