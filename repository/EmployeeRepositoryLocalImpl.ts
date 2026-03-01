@@ -40,6 +40,7 @@ class EmployeeRepositoryLocalImpl implements IEmployeeRepository {
                     p.position,
                     p.businessUnit,
                     p.profileImageUrl,
+                    p.slackId,
                 ),
         );
     }
