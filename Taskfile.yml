@@ -99,27 +99,19 @@ tasks:
   deploy:dev:
     desc: Deploy nversary to dev (bootstraps remote state automatically)
     cmds:
-      - task: tf:apply
-        vars:
-          ENV: dev
+      - task tf:apply ENV=dev
 
   deploy:prod:
     desc: Deploy nversary to prod (bootstraps remote state automatically)
     cmds:
-      - task: tf:apply
-        vars:
-          ENV: prod
+      - task tf:apply ENV=prod
 
   deploy:plan:dev:
     desc: Plan nversary deployment for dev (bootstraps remote state automatically)
     cmds:
-      - task: tf:plan
-        vars:
-          ENV: dev
+      - task tf:plan ENV=dev
 
   deploy:plan:prod:
     desc: Plan nversary deployment for prod (bootstraps remote state automatically)
     cmds:
-      - task: tf:plan
-        vars:
-          ENV: prod
+      - task tf:plan ENV=prod
