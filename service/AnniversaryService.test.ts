@@ -1,4 +1,5 @@
 import { EmployeeRepositoryLocalImpl } from "../repository/EmployeeRepositoryLocalImpl";
+import type { PeopleData } from "../repository/EmployeeRepositoryLocalImpl";
 import { AnniversaryService } from "./AnniversaryService";
 
 /**
@@ -43,7 +44,7 @@ const data = {
 };
 
 const service = new AnniversaryService(
-  new EmployeeRepositoryLocalImpl((data as any)));
+  new EmployeeRepositoryLocalImpl(data as PeopleData));
 
 it("It should not congratulate anyone on 2020-02-01 because it is Saturday", async () => {
   const congratulationDay = service.getEmployeesToCongratulateToday(new Date("2020-02-01T03:24:00"), 2);
@@ -92,4 +93,3 @@ it("It should congratulate 3 employees on 2020-02-03 when using maxPerDay == 3",
   expect(congratulationDay.employees[1].fullName).toBe("Employee 2");
   expect(congratulationDay.employees[2].fullName).toBe("Employee 4");
 });
-
