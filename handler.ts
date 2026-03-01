@@ -1,7 +1,6 @@
 import S3 from "aws-sdk/clients/s3";
 import SSM from "aws-sdk/clients/ssm";
-import { URL } from "url";
-import { Callback, Context, Handler, ScheduledEvent } from "aws-lambda";
+import { Context } from "aws-lambda";
 import { INversaryEvent } from "./domain/NversaryEvent";
 import { SlackConfiguration } from "./domain/SlackConfiguration";
 import { EmployeeRepositoryLocalImpl } from "./repository/EmployeeRepositoryLocalImpl";
@@ -49,11 +48,10 @@ const fetchPeopleData = async (
         .then((response: any) => JSON.parse(response.Body.toString("utf-8")));
 };
 
-export const greeter: Handler = async (
+export const greeter = async (
     event: INversaryEvent,
-    context: Context,
-    cb: Callback,
-) => {
+    _context: Context,
+): Promise<void> => {
     console.info("event: \n" + JSON.stringify(event, null, 2));
 
     const date = event.dateString ? new Date(event.dateString) : new Date();
