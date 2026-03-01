@@ -15,7 +15,8 @@ At runtime it:
 
 1. Trigger
 
-- EventBridge rule invokes Lambda once per day using `cron(50 3 * * ? *)` (03:50 UTC).
+- Production EventBridge rule invokes Lambda once per day using `cron(50 3 * * ? *)` (03:50 UTC).
+- Development EventBridge rule is intentionally disabled with `cron(0 0 31 2 ? *)`.
 
 2. Lambda entrypoint
 
@@ -32,14 +33,14 @@ At runtime it:
 
 4. Domain/repository/services
 
-- `EmployeeRepositoryLocalImpl` maps JSON to `Employee` and `Presence`.
+- `EmployeeRepositoryLocalImpl` maps JSON to `Employee` and `Presence` (including optional `slackId`).
 - `AnniversaryService` computes monthly congratulation-day assignments.
 - `CongratulationService` resolves mentions, formats messages, and chooses send times.
 - `SlackService` calls Slack APIs.
 
 5. External integration
 
-- Slack `users.list` for mapping email -> Slack user id
+- Slack `users.list` for mapping email -> Slack user id (fallback when `slackId` is missing in people data)
 - Slack `chat.scheduleMessage` for scheduled post delivery
 
 ## Main execution flow
@@ -63,7 +64,7 @@ At runtime it:
 - Uses `maxPerDay = 3`
 - Asks `AnniversaryService` for people assigned to this date
 - For each selected employee:
-    - fetches mention tag from Slack users by email
+    - uses direct mention from `employee.slackId` when available, otherwise resolves by email via Slack users API
     - builds message/context text
     - schedules Slack message (or near-immediate schedule when `sendNow=true`)
 
@@ -80,7 +81,7 @@ At runtime it:
 
 - Base message:
     - `Congratulations *<fullName>* <optionalTag><years> year(s) at Nitor! :tada:`
-- Context line includes start date, position, and subcompany.
+- Context line includes start date, position, and business unit.
 - Milestone extras:
     - `>= 5 years`: one palm tree
     - `>= 10 years`: two palm trees
@@ -96,7 +97,7 @@ Deployment is Terraform-based (not Serverless Framework).
     - `terraform/infra/envs/dev`
     - `terraform/infra/envs/prod`
 - Region: `eu-west-1`
-- Lambda runtime: `nodejs20.x`
+- Lambda runtime: `nodejs24.x` (set in env roots)
 - Lambda timeout: `300s`
 
 Module provisions:

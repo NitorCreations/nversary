@@ -23,6 +23,34 @@ The artifact is created by Task at:
 
 An AWS Account is required. If you don't have one, create it at <https://aws.amazon.com/>
 
+### People data (S3 object)
+
+People data is read from `s3://$PEOPLE_S3_BUCKET/$PEOPLE_S3_KEY`.
+
+Expected shape:
+
+```json
+{
+  "people": [
+    {
+      "fullName": "Example Person",
+      "email": "example.person@example.com",
+      "presence": [{ "start": "2018-02-01" }],
+      "position": "Senior Consultant",
+      "businessUnit": "Technology",
+      "profileImageUrl": "https://example.com/image.jpg",
+      "slackId": "U0123456789"
+    }
+  ]
+}
+```
+
+Notes:
+
+- `slackId` is optional but recommended; when present, nversary mentions that Slack user directly.
+- If `slackId` is missing, nversary falls back to matching Slack users by `email`.
+- `profileImageUrl` is optional.
+
 ### Slack
 
 - Go to <https://api.slack.com/apps> and click Create New App, give your app a name and attach it to a workspace.
@@ -75,6 +103,11 @@ Deployment values come from Terraform input variables and static values in `terr
 - `artifact_file` (local path to the Lambda zip)
 - `log_retention_days`
 
+Current environment scheduling:
+
+- `dev`: disabled schedule (`cron(0 0 31 2 ? *)`)
+- `prod`: daily at `03:50 UTC` (`cron(50 3 * * ? *)`)
+
 ### Deployment prerequisites
 
 Install:
@@ -123,7 +156,7 @@ npm run test
 ### End to end testing
 
 You can test the Lambda function from AWS Lambda console by creating a test event with a `dateString` attribute.
-The date string should be in 'yyyy-MM-dd' format.
+The date string should be in `yyyy-MM-dd` format.
 Setting `sendNow` to true, will send messages immediately. An example of test event:
 
 ```json
