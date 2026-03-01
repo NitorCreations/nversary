@@ -45,3 +45,9 @@ variable "schedule_expression" {
   description = "Schedule expression for Lambda invocation (e.g. cron or rate expression)"
   type        = string
 }
+
+variable "slack_dry_run" {
+  description = "Whether Slack messages are sent in dry-run mode"
+  type        = bool
+  default     = false
+}

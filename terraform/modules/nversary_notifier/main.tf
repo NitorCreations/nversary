@@ -111,6 +111,7 @@ resource "aws_lambda_function" "nversary_notifier" {
       PEOPLE_S3_BUCKET   = var.people_s3_bucket
       PEOPLE_S3_KEY      = var.people_s3_key
       SSM_PARAMETER_NAME = var.ssm_parameter_name
+      SLACK_DRY_RUN      = tostring(var.slack_dry_run)
     }
   }
 

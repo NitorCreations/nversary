@@ -28,7 +28,7 @@ const fetchConfig = async (parameterName: string): Promise<Config> => {
                 config.slack.webhookUrl as string,
                 config.slack.channelId as string,
                 config.slack.appToken as string,
-                false,
+                process.env["SLACK_DRY_RUN"] === "true",
             ),
         }));
 };

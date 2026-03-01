@@ -108,6 +108,26 @@ Current environment scheduling:
 - `dev`: disabled schedule (`cron(0 0 31 2 ? *)`)
 - `prod`: daily at `03:50 UTC` (`cron(50 3 * * ? *)`)
 
+### Slack dry-run by environment
+
+Slack send behavior is controlled by the Lambda environment variable `SLACK_DRY_RUN`.
+
+- `dev`: configurable at deploy time via `SLACK_DRY_RUN`, defaults to `true`
+- `prod`: always `false` (messages are always sent)
+
+Examples:
+
+```shell
+# dev default (dry-run enabled)
+task deploy:dev
+
+# dev override (send real Slack messages)
+SLACK_DRY_RUN=false task deploy:dev
+
+# prod (always dry-run=false)
+task deploy:prod
+```
+
 ### Deployment prerequisites
 
 Install:

@@ -12,3 +12,9 @@ variable "ssm_parameter_name" {
   description = "SSM parameter name for Slack configuration"
   type        = string
 }
+
+variable "slack_dry_run" {
+  description = "Dry-run mode for Slack messages in dev"
+  type        = bool
+  default     = true
+}

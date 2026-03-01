@@ -11,4 +11,5 @@ module "nversary_notifier" {
   artifact_file      = "${path.module}/../../../../build/prod/nversary.zip"
   schedule_expression = "cron(50 3 * * ? *)"
   log_retention_days = 30
+  slack_dry_run      = false
 }

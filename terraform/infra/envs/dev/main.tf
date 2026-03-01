@@ -11,4 +11,5 @@ module "nversary_notifier" {
   artifact_file       = "${path.module}/../../../../build/dev/nversary.zip"
   schedule_expression = "cron(0 0 31 2 ? *)" // This will never fire, effectively disabling the scheduled execution in the dev environment
   log_retention_days  = 30
+  slack_dry_run       = var.slack_dry_run
 }

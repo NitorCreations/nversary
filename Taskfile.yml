@@ -81,7 +81,8 @@ tasks:
         terraform plan \
           -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
           -var="people_s3_key=$PEOPLE_S3_KEY" \
-          -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
+          -var="ssm_parameter_name=$SSM_PARAMETER_NAME" \
+          $( [ "{{.ENV}}" = "dev" ] && echo "-var=slack_dry_run=${SLACK_DRY_RUN:-true}" )
 
   tf:apply:
     desc: Terraform apply for ENV={{.ENV}}
@@ -92,7 +93,8 @@ tasks:
         terraform apply -auto-approve \
           -var="people_s3_bucket=$PEOPLE_S3_BUCKET" \
           -var="people_s3_key=$PEOPLE_S3_KEY" \
-          -var="ssm_parameter_name=$SSM_PARAMETER_NAME"
+          -var="ssm_parameter_name=$SSM_PARAMETER_NAME" \
+          $( [ "{{.ENV}}" = "dev" ] && echo "-var=slack_dry_run=${SLACK_DRY_RUN:-true}" )
 
   deploy:dev:
     desc: Deploy nversary to dev (bootstraps remote state automatically)
