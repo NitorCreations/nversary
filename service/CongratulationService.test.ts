@@ -38,7 +38,7 @@ it("Sends message without tag", async () => {
             "asd@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -50,7 +50,7 @@ it("Sends message without tag", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 2 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime,
@@ -74,7 +74,7 @@ it("Sends message with tag", async () => {
             "asd@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -86,7 +86,7 @@ it("Sends message with tag", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* <@id> 2 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime,
@@ -110,7 +110,7 @@ it("Sends message with profileImageUrl", async () => {
             "asd@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
             "https://example.com/image.jpg",
         ),
     ];
@@ -123,7 +123,7 @@ it("Sends message with profileImageUrl", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* <@id> 2 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
         ],
         "https://example.com/image.jpg",
         sendTime,
@@ -145,14 +145,14 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
             "asd1@asd.com",
             [new Presence(new Date("2017-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
         new Employee(
             "Maija Mallikas",
             "asd2@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Junior Architect",
-            "Other Company Oy",
+            "Think",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -166,7 +166,7 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
-            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect at Other Company Oy.",
+            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
         ],
         undefined,
         sendTime2,
@@ -174,7 +174,7 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime1,
@@ -197,21 +197,21 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
             "asd1@asd.com",
             [new Presence(new Date("2017-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
         new Employee(
             "Maija Mallikas",
             "asd2@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Junior Architect",
-            "Other Company Oy",
+            "Think",
         ),
         new Employee(
             "Minna Mallikas",
             "asd3@asd.com",
             [new Presence(new Date("2019-02-06"))],
             "Very Junior Architect",
-            "Other Company Oy",
+            "Design",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -227,7 +227,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
-            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect at Other Company Oy.",
+            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
         ],
         undefined,
         sendTime2,
@@ -235,7 +235,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime1,
@@ -243,7 +243,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Minna Mallikas* 1 year at Nitor! :tada:",
         [
-            "Minna started at Nitor on 6.2.2019 and works now as Very Junior Architect at Other Company Oy.",
+            "Minna started at Nitor on 6.2.2019 and works now as Very Junior Architect in Design.",
         ],
         undefined,
         sendTime3,
@@ -265,14 +265,14 @@ it("Sends messages immediately if sendImmediately=true", async () => {
             "asd1@asd.com",
             [new Presence(new Date("2017-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
         new Employee(
             "Maija Mallikas",
             "asd2@asd.com",
             [new Presence(new Date("2018-02-06"))],
             "Junior Architect",
-            "Other Company Oy",
+            "Think",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -288,7 +288,7 @@ it("Sends messages immediately if sendImmediately=true", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
-            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime,
@@ -296,7 +296,7 @@ it("Sends messages immediately if sendImmediately=true", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
-            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect at Other Company Oy.",
+            "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
         ],
         undefined,
         sendTime,
@@ -318,7 +318,7 @@ it("Sends message special message on 5 year nversary", async () => {
             "asd@asd.com",
             [new Presence(new Date("2015-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -330,7 +330,7 @@ it("Sends message special message on 5 year nversary", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 5 years at Nitor! :tada::palm_tree:",
         [
-            "Erkki started at Nitor on 6.2.2015 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2015 and works now as Senior Architect in Technology.",
             "Achievement Unlocked: Nitor Nestori! :palm_tree:",
         ],
         undefined,
@@ -353,7 +353,7 @@ it("Sends message special message on 10 year nversary", async () => {
             "asd@asd.com",
             [new Presence(new Date("2010-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -365,7 +365,7 @@ it("Sends message special message on 10 year nversary", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 10 years at Nitor! :tada::palm_tree::palm_tree:",
         [
-            "Erkki started at Nitor on 6.2.2010 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2010 and works now as Senior Architect in Technology.",
             "Achievement Unlocked: Nitor Fellow! :palm_tree::palm_tree:",
         ],
         undefined,
@@ -388,7 +388,7 @@ it("Sends one extra emoji for 6-9 year nversary", async () => {
             "asd@asd.com",
             [new Presence(new Date("2012-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -400,7 +400,7 @@ it("Sends one extra emoji for 6-9 year nversary", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 8 years at Nitor! :tada::palm_tree:",
         [
-            "Erkki started at Nitor on 6.2.2012 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2012 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime,
@@ -422,7 +422,7 @@ it("Sends two extra emojis for 10+ year nversary", async () => {
             "asd@asd.com",
             [new Presence(new Date("2009-02-06"))],
             "Senior Architect",
-            "Software Company Oy",
+            "Technology",
         ),
     ];
     anniversaryService.getEmployeesToCongratulateToday = jest.fn(
@@ -434,7 +434,7 @@ it("Sends two extra emojis for 10+ year nversary", async () => {
     expect(slackService.scheduleMessage).toBeCalledWith(
         "Congratulations *Erkki Esimerkki* 11 years at Nitor! :tada::palm_tree::palm_tree:",
         [
-            "Erkki started at Nitor on 6.2.2009 and works now as Senior Architect at Software Company Oy.",
+            "Erkki started at Nitor on 6.2.2009 and works now as Senior Architect in Technology.",
         ],
         undefined,
         sendTime,

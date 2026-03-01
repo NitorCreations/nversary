@@ -94,7 +94,7 @@ class CongratulationService {
             } at Nitor! :tada:${yearEmojis}`;
         const firstName = employee.fullName.replace(/ .*/, "");
         const contextMessages: string[] = [
-            `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} at ${employee.businessUnit}.`,
+            `${firstName} started at Nitor on ${startDateStr} and works now as ${employee.position} in ${employee.businessUnit}.`,
         ];
 
         if (yearsAtCompany === 5) {
