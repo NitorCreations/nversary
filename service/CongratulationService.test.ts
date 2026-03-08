@@ -440,3 +440,54 @@ it("Sends two extra emojis for 10+ year nversary", async () => {
         sendTime,
     );
 });
+
+it("Returns early when anniversaryService returns undefined", async () => {
+    const now = new Date("2020-02-06T03:30:00Z");
+    slackService.scheduleMessage = jest.fn(() => Promise.resolve());
+
+    anniversaryService.getEmployeesToCongratulateToday = jest.fn(
+        (date: Date, maxPerDay: number) => undefined,
+    );
+
+    await service.congratulate(now, false);
+
+    expect(slackService.scheduleMessage).not.toHaveBeenCalled();
+});
+
+it("Fetches Slack tag via getUsers when employee has no slackId", async () => {
+    const now = new Date("2020-02-06T03:30:00Z");
+    slackService.getUsers = jest.fn(() =>
+        Promise.resolve([new SlackUser("U999", "Erkki E", "asd@asd.com")]),
+    );
+    slackService.scheduleMessage = jest.fn(() => Promise.resolve());
+
+    const congratulationDay = new CongratulationDay(now);
+    congratulationDay.employees = [
+        new Employee(
+            "Erkki Esimerkki",
+            "asd@asd.com",
+            [new Presence(new Date("2018-02-06"))],
+            "Senior Architect",
+            "Technology",
+            // no profileImageUrl
+            undefined,
+            // no slackId — must be fetched
+            undefined,
+        ),
+    ];
+    anniversaryService.getEmployeesToCongratulateToday = jest.fn(
+        () => congratulationDay,
+    );
+
+    await service.congratulate(now, false);
+
+    expect(slackService.getUsers).toHaveBeenCalled();
+    expect(slackService.scheduleMessage).toBeCalledWith(
+        "Congratulations *Erkki Esimerkki* <@U999> 2 years at Nitor! :tada:",
+        [
+            "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
+        ],
+        undefined,
+        new Date("2020-02-06T11:40:00Z"),
+    );
+});
