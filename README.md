@@ -6,22 +6,38 @@ nversary congratulates people on their work anniversary in Slack.
 
 Anniversary messages are sent on working days only, with a maximum of 3 messages per day. If there are more than 3 anniversaries on nearby dates, they are spread out so that people with longer tenure get the message closest to their actual anniversary day.
 
+## Getting started
+
+The full setup, in the order it needs to happen:
+
+1. **Install tooling** — Task, Terraform (`>= 1.14.0`), Node.js + npm. See [Deployment prerequisites](#deployment-prerequisites).
+2. **Configure AWS credentials** for an account in `eu-west-1`. See [AWS credentials](#aws-credentials).
+3. **Create the S3 people-data object** with the employee JSON. See [People data (S3 object)](#people-data-s3-object).
+4. **Create the SSM `SecureString` parameter** with the Slack config. See [Slack](#slack).
+5. **Export the required environment variables** (`PEOPLE_S3_BUCKET`, `PEOPLE_S3_KEY`, `SSM_PARAMETER_NAME`). See [Environment variables](#environment-variables).
+6. **Deploy** with `task deploy:plan:dev` to preview, then `task deploy:dev` to apply. See [Deploy with Task](#deploy-with-task).
+
+Steps 1–2 and 5 are hard prerequisites for `terraform apply`; the S3 object and SSM parameter (steps 3–4) are only read by the Lambda at runtime, so deployment succeeds without them but the Lambda will fail until they exist.
+
 ## Instructions
 
 How to set up and configure nversary
 
-### Build
-
-Build and package the Lambda artifact as a local zip file for Terraform to deploy.
-
-The artifact is created by Task at:
-
-- `build/dev/nversary.zip`
-- `build/prod/nversary.zip`
-
 ### AWS Account
 
 An AWS Account is required. If you don't have one, create it at <https://aws.amazon.com/>
+
+### AWS credentials
+
+Terraform and the AWS CLI authenticate using the standard AWS credential chain (`~/.aws/credentials`, environment variables, or SSO) — nversary does not read any `AWS_*` variables of its own. The target region is hardcoded to `eu-west-1` in the Terraform providers and backends, so your default region does not matter, but your credentials must be valid for the account you want to deploy into.
+
+The credentials need permissions to manage: S3 (the Terraform state bucket), IAM roles/policies, Lambda, CloudWatch Logs, and EventBridge.
+
+Sign in with `aws configure` (or `aws sso login`) and verify with:
+
+```shell
+aws sts get-caller-identity
+```
 
 ### People data (S3 object)
 
@@ -68,7 +84,7 @@ The JSON in SSM Parameter Store looks similar to this:
 {
     "slack": {
         "webhookUrl": "",
-        "appToken": "xoxb-32896343824-849329924324243-lkjrewrwXKhgkDkfobo4dore",
+        "appToken": "xoxb-....",
         "channelId": "JO3KFSO5"
     }
 }
@@ -136,13 +152,28 @@ Install:
 - Terraform (`>= 1.14.0`)
 - Node.js + npm
 
-Set required environment variables:
+### Environment variables
+
+Before running any deploy or plan command, export these variables. Task validates them in its `check-env` step and **aborts the deploy if any is missing**. The same three values are also injected as the Lambda's runtime environment variables.
 
 ```shell
+# Required — validated by `task`; deploy aborts if any is unset
 export PEOPLE_S3_BUCKET=your-people-bucket
 export PEOPLE_S3_KEY=path/to/people.json
 export SSM_PARAMETER_NAME=/path/to/slack-config
+
+# Optional — dev only, defaults to true; prod always sends real messages
+export SLACK_DRY_RUN=false
 ```
+
+**Persist them so you don't have to remember next time.** Save the exports once to a local, git-ignored file (e.g. `.env.local`) and source it before deploying:
+
+```shell
+set -a; source .env.local; set +a
+task deploy:plan:dev
+```
+
+Keep that file out of version control (it names your real bucket and parameter) — add it to `.gitignore`. If you use [direnv](https://direnv.net/), an `.envrc` with the same exports loads them automatically when you `cd` into the project. (Task can also auto-load a dotenv via a `dotenv:` directive in `Taskfile.yml` if you later want that built in.)
 
 ### Deploy with Task
 
@@ -164,8 +195,10 @@ Task workflow does all of the following:
 
 - validates required environment variables
 - bootstraps Terraform remote state from `terraform/remote-state/main.tf` if needed
-- packages Lambda artifact zip for the selected environment
+- packages the Lambda artifact zip for the selected environment (`build/dev/nversary.zip` or `build/prod/nversary.zip`)
 - runs Terraform `init`, `plan`, and `apply` in the matching environment root
+
+You do not need to build the artifact separately — packaging happens automatically as part of plan/apply.
 
 ### Unit testing
 
