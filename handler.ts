@@ -66,6 +66,7 @@ export const greeter = async (
     const service = new CongratulationService(
         new AnniversaryService(new EmployeeRepositoryLocalImpl(peopleData)),
         new SlackService(config.slack),
+        process.env["SKIP_NESTORI_ACHIEVEMENT"] !== "false",
     );
 
     await service.congratulate(date, event.sendNow);
