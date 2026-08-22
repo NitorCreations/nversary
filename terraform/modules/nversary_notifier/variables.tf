@@ -51,3 +51,9 @@ variable "slack_dry_run" {
   type        = bool
   default     = false
 }
+
+variable "skip_nestori_achievement" {
+  description = "When true, hide the 'Achievement Unlocked: Nitor Nestori!' line on 5-year anniversaries"
+  type        = bool
+  default     = true
+}

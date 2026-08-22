@@ -15,6 +15,13 @@ const anniversaryService = new AnniversaryService(mockRepostitoryService);
 const slackService = new SlackService(new SlackConfiguration("", "", "", true));
 
 const service = new CongratulationService(anniversaryService, slackService);
+// Same service but with the Nestori achievement line enabled (flag off),
+// used to verify the pre-suppression wording.
+const serviceNoSkip = new CongratulationService(
+    anniversaryService,
+    slackService,
+    false,
+);
 
 jest.spyOn(global, "setTimeout").mockImplementation((fn: any) => {
     if (typeof fn === "function") {
@@ -303,7 +310,7 @@ it("Sends messages immediately if sendImmediately=true", async () => {
     );
 });
 
-it("Sends message special message on 5 year nversary", async () => {
+it("Hides the Nitor Nestori achievement line on 5 year nversary by default", async () => {
     const now = new Date("2020-02-06T03:30:00Z");
     //slackService.getChannelUsers = jest.fn(() => Promise.resolve([]));
     slackService.getUsers = jest.fn(() => Promise.resolve([]));
@@ -326,6 +333,41 @@ it("Sends message special message on 5 year nversary", async () => {
     );
 
     await service.congratulate(now, false);
+    const sendTime = new Date("2020-02-06T11:40:00Z");
+    // The employee is still congratulated (message + start-date context line),
+    // but the "Achievement Unlocked: Nitor Nestori!" line is suppressed.
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
+        "Congratulations *Erkki Esimerkki* 5 years at Nitor! :tada::palm_tree:",
+        [
+            "Erkki started at Nitor on 6.2.2015 and works now as Senior Architect in Technology.",
+        ],
+        undefined,
+        sendTime,
+    );
+});
+
+it("Shows the Nitor Nestori achievement line on 5 year nversary when flag is off", async () => {
+    const now = new Date("2020-02-06T03:30:00Z");
+    slackService.getUsers = jest.fn(() => Promise.resolve([]));
+    slackService.scheduleMessage = jest.fn((message, contextMessage, now) =>
+        Promise.resolve(),
+    );
+
+    const congratulationDay = new CongratulationDay(now);
+    congratulationDay.employees = [
+        new Employee(
+            "Erkki Esimerkki",
+            "asd@asd.com",
+            [new Presence(new Date("2015-02-06"))],
+            "Senior Architect",
+            "Technology",
+        ),
+    ];
+    anniversaryService.getEmployeesToCongratulateToday = jest.fn(
+        (date: Date, maxPerDay: number) => congratulationDay,
+    );
+
+    await serviceNoSkip.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
     expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 5 years at Nitor! :tada::palm_tree:",
