@@ -7,13 +7,16 @@ import { SlackService } from "./SlackService";
 class CongratulationService {
     public anniversaryService: AnniversaryService;
     public slackService: SlackService;
+    public skipNestoriAchievement: boolean;
 
     constructor(
         anniversaryService: AnniversaryService,
         slackService: SlackService,
+        skipNestoriAchievement: boolean = true,
     ) {
         this.anniversaryService = anniversaryService;
         this.slackService = slackService;
+        this.skipNestoriAchievement = skipNestoriAchievement;
     }
 
     public async congratulate(
@@ -98,9 +101,11 @@ class CongratulationService {
         ];
 
         if (yearsAtCompany === 5) {
-            contextMessages.push(
-                "Achievement Unlocked: Nitor Nestori! :palm_tree:",
-            );
+            if (!this.skipNestoriAchievement) {
+                contextMessages.push(
+                    "Achievement Unlocked: Nitor Nestori! :palm_tree:",
+                );
+            }
         } else if (yearsAtCompany === 10) {
             contextMessages.push(
                 "Achievement Unlocked: Nitor Fellow! :palm_tree::palm_tree:",
