@@ -115,6 +115,7 @@ class CongratulationService {
             : messageTime;
 
         console.info(`Scheduling a message for ${employee.fullName}`);
+        console.debug(`Message: ${message}\n${contextMessages}`);
         await this.slackService.scheduleMessage(
             message,
             contextMessages,
