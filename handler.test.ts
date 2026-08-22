@@ -6,14 +6,14 @@ jest.mock("aws-sdk/clients/s3", () => {
   class MockS3 {
     getObject = mockGetObject;
   }
-  return { default: MockS3 };
+  return { __esModule: true, default: MockS3 };
 });
 
 jest.mock("aws-sdk/clients/ssm", () => {
   class MockSSM {
     getParameter = mockGetParameter;
   }
-  return { default: MockSSM };
+  return { __esModule: true, default: MockSSM };
 });
 
 import { greeter } from "./handler";

@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.build.json",
+  "compilerOptions": {
+    "types": ["node", "jest"]
+  },
+  "include": [
+    "handler.ts",
+    "domain/**/*.ts",
+    "repository/**/*.ts",
+    "service/**/*.ts",
+    "test/**/*.ts",
+    "**/*.test.ts"
+  ]
+}

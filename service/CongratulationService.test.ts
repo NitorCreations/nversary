@@ -47,7 +47,7 @@ it("Sends message without tag", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 2 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
@@ -83,7 +83,7 @@ it("Sends message with tag", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* <@id> 2 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
@@ -120,7 +120,7 @@ it("Sends message with profileImageUrl", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* <@id> 2 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
@@ -163,7 +163,7 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
 
     const sendTime1 = new Date("2020-02-06T11:40:00Z");
     const sendTime2 = new Date("2020-02-06T07:50:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
             "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
@@ -171,7 +171,7 @@ it("Sends 2 message if there are 2 persons to congratulate", async () => {
         undefined,
         sendTime2,
     );
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
@@ -224,7 +224,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
     const sendTime2 = new Date("2020-02-06T07:50:00Z");
     const sendTime3 = new Date("2020-02-06T09:45:00Z");
 
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
             "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
@@ -232,7 +232,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
         undefined,
         sendTime2,
     );
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
@@ -240,7 +240,7 @@ it("Sends 3 message if there are 3 persons to congratulate", async () => {
         undefined,
         sendTime1,
     );
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Minna Mallikas* 1 year at Nitor! :tada:",
         [
             "Minna started at Nitor on 6.2.2019 and works now as Very Junior Architect in Design.",
@@ -285,7 +285,7 @@ it("Sends messages immediately if sendImmediately=true", async () => {
         Math.ceil(new Date().getTime() / 1000) * 1000 + 10000,
     );
 
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 3 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2017 and works now as Senior Architect in Technology.",
@@ -293,7 +293,7 @@ it("Sends messages immediately if sendImmediately=true", async () => {
         undefined,
         sendTime,
     );
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Maija Mallikas* 2 years at Nitor! :tada:",
         [
             "Maija started at Nitor on 6.2.2018 and works now as Junior Architect in Think.",
@@ -327,7 +327,7 @@ it("Sends message special message on 5 year nversary", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 5 years at Nitor! :tada::palm_tree:",
         [
             "Erkki started at Nitor on 6.2.2015 and works now as Senior Architect in Technology.",
@@ -362,7 +362,7 @@ it("Sends message special message on 10 year nversary", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 10 years at Nitor! :tada::palm_tree::palm_tree:",
         [
             "Erkki started at Nitor on 6.2.2010 and works now as Senior Architect in Technology.",
@@ -397,7 +397,7 @@ it("Sends one extra emoji for 6-9 year nversary", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 8 years at Nitor! :tada::palm_tree:",
         [
             "Erkki started at Nitor on 6.2.2012 and works now as Senior Architect in Technology.",
@@ -431,7 +431,7 @@ it("Sends two extra emojis for 10+ year nversary", async () => {
 
     await service.congratulate(now, false);
     const sendTime = new Date("2020-02-06T11:40:00Z");
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* 11 years at Nitor! :tada::palm_tree::palm_tree:",
         [
             "Erkki started at Nitor on 6.2.2009 and works now as Senior Architect in Technology.",
@@ -482,7 +482,7 @@ it("Fetches Slack tag via getUsers when employee has no slackId", async () => {
     await service.congratulate(now, false);
 
     expect(slackService.getUsers).toHaveBeenCalled();
-    expect(slackService.scheduleMessage).toBeCalledWith(
+    expect(slackService.scheduleMessage).toHaveBeenCalledWith(
         "Congratulations *Erkki Esimerkki* <@U999> 2 years at Nitor! :tada:",
         [
             "Erkki started at Nitor on 6.2.2018 and works now as Senior Architect in Technology.",
